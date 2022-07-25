@@ -4,7 +4,8 @@ interface BaseData {
 
 interface Category extends BaseData {
   min_credits?: number,
-  name: string
+  name: string,
+  notes?: string
 }
 
 interface Season extends BaseData {
@@ -27,5 +28,6 @@ interface Course extends BaseData {
 
   credits: number,
   link: string,
-  name: string
+  name: string,
+  school_course_id: string
 }
