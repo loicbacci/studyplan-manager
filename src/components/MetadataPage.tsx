@@ -1,10 +1,10 @@
-import { Stack, Tab, TabIndicator, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
+import { Stack, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 import React from "react";
 import { useDatabase } from "../firebase/database";
 import CategoriesPage from "./CategoriesPage";
 
 const MetadataPage = () => {
-  const { categories, seasons, semesters, subcategories } = useDatabase();
+  const { categories } = useDatabase();
 
   return (
     <Stack>

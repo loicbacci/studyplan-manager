@@ -1,7 +1,7 @@
-import { Button, Modal, ModalBody, ModalCloseButton, ModalContent, Heading, ModalFooter, ModalHeader, ModalOverlay, useDisclosure, Text, FormControl, FormLabel, Input, useToast, FormErrorMessage, Flex, Spacer, Popover, PopoverTrigger, PopoverContent, PopoverAnchor, PopoverArrow, PopoverCloseButton, PopoverHeader, PopoverBody, NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Stack, TableContainer, Table, Thead, Tr, Th, Tbody, Td, Tooltip, Box, HStack, IconButton } from "@chakra-ui/react";
-import React, { ReactNode, useEffect, useState } from "react";
+import { Button, Flex, FormControl, FormErrorMessage, FormLabel, HStack, IconButton, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, NumberDecrementStepper, NumberIncrementStepper, NumberInput, NumberInputField, NumberInputStepper, Spacer, Stack, Text, useDisclosure, useToast } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
+import { FiEdit } from 'react-icons/fi';
 import { addCategory, updateCategory } from "../firebase/categories";
-import { FiEdit } from 'react-icons/fi'
 
 interface CategoryModalProps {
   category?: Category
