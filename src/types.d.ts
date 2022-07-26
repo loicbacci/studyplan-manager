@@ -1,33 +1,35 @@
 interface BaseData {
-  id: string
+  id: string;
 }
 
 interface Category extends BaseData {
-  min_credits?: number,
-  name: string,
-  notes?: string
+  name: string;
+  min_credits?: number;
+  notes?: string;
 }
 
 interface Season extends BaseData {
-  name: string
+  name: string;
 }
 
 interface Semester extends BaseData {
-  name: string
+  name: string;
 }
 
 interface SubCategory extends BaseData {
-  min_credits?: number,
-  name: string
+  name: string;
+  parentId: string;
+  min_credits?: number;
+  notes?: string;
 }
 
 interface Course extends BaseData {
-  category_id: string,
-  season_id: string,
-  subcategory_id: string,
+  category_id: string;
+  season_id: string;
+  subcategory_id: string;
 
-  credits: number,
-  link: string,
-  name: string,
-  school_course_id: string
+  credits: number;
+  link: string;
+  name: string;
+  school_course_id: string;
 }

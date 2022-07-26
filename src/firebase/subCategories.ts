@@ -3,14 +3,15 @@ import { db } from "./database";
 import { auth } from "./config";
 
 
-export const updateCategory = (
+export const updateSubCategory = (
   id: string,
   name: string,
+  parentId: string,
   min_credits?: number,
   notes?: string
 ) => {
-  let toAdd: Partial<Category> = {
-    name,
+  let toAdd: Partial<SubCategory> = {
+    name, parentId
   };
 
   if (min_credits) {
@@ -27,19 +28,20 @@ export const updateCategory = (
   console.log(toAdd);
 
   return updateDoc(
-    doc(db, "users", auth.currentUser.uid, "categories", id),
+    doc(db, "users", auth.currentUser.uid, "subcategories", id),
     toAdd
   );
 };
 
 
-export const addCategory = (
+export const addSubCategory = (
   name: string,
+  parentId: string,
   min_credits?: number,
   notes?: string
 ) => {
-  let toAdd: Partial<Category> = {
-    name,
+  let toAdd: Partial<SubCategory> = {
+    name, parentId
   };
 
   if (min_credits) {
@@ -54,14 +56,14 @@ export const addCategory = (
     return Promise.reject("The user is not authentificated");
 
   return addDoc(
-    collection(db, "users", auth.currentUser.uid, "categories"),
+    collection(db, "users", auth.currentUser.uid, "subcategories"),
     toAdd
   );
 };
 
-export const deleteCategory = (id: string) => {
+export const deleteSubCategory = (id: string) => {
   if (!auth.currentUser)
     return Promise.reject("The user is not authentificated");
 
-  return deleteDoc(doc(db, "users", auth.currentUser.uid, "categories", id));
+  return deleteDoc(doc(db, "users", auth.currentUser.uid, "subcategories", id));
 }

@@ -1,41 +1,46 @@
+import "firebaseui/dist/firebaseui.css";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import Layout from "./components/Layout";
+import { useAuth } from "./firebase/config";
+import MetadataPage from "./metadata/MetadataPage";
+import CoursesPage from "./pages/CoursesPage";
+import DashboardPage from "./pages/DashboardPage";
+import LoginPage from "./pages/LoginPage";
 
-import { useEffect } from 'react';
-import * as firebaseui from 'firebaseui';
-import { auth, useAuth } from './firebase/config';
-import { EmailAuthProvider } from 'firebase/auth';
-import { Container, Flex, Heading, Stack } from '@chakra-ui/react';
-import 'firebaseui/dist/firebaseui.css';
-import Header from './components/Header';
-import MetadataPage from './components/MetadataPage';
+const RequireAuth = ({ children }: { children: React.ReactNode }) => {
+  const { isLoggedIn } = useAuth();
+  const location = useLocation();
 
-const ui = new firebaseui.auth.AuthUI(auth);
+  if (!isLoggedIn && location.pathname !== "/login") {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
 
+  return <>{children}</>;
+};
 
-function App() {
+const App = () => {
   const { isLoggedIn } = useAuth();
 
-  useEffect(() => {
-    if (isLoggedIn) return;
+  return (
+    <Layout loggedIn={isLoggedIn}>
+      <RequireAuth>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/metadata" element={<MetadataPage />} />
+          <Route path="/courses" element={<CoursesPage />} />
+        </Routes>
+      </RequireAuth>
+    </Layout>
+  );
 
-    ui.start('#firebaseui-auth-container', {
-      signInOptions: [
-        EmailAuthProvider.PROVIDER_ID
-      ]
-    })
-  }, [isLoggedIn]);
-
+  /*
   if (!isLoggedIn) {
     return (
-      <Flex direction="column">
-        <Header />
-        <Container>
-          <Stack spacing={6}>
-            <Heading>Log In</Heading>
-            <div id='firebaseui-auth-container'/>
-          </Stack>
-        </Container>
-      </Flex> 
-
+      <Layout>
+        <LoginPage />
+      </Layout>
     );
   }
 
@@ -46,7 +51,7 @@ function App() {
         <MetadataPage />
       </Container>
     </Flex> 
-  );
-}
+  );*/
+};
 
 export default App;

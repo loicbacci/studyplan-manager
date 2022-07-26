@@ -1,9 +1,8 @@
 import { Stack } from "@chakra-ui/react";
-import React from "react";
-import CategoryModal from "../modals/CategoryModal";
+import CategoryEntry from "./CategoryEntry";
 
 interface CategoriesPageProps {
-  categories: Category[]
+  categories: Category[];
 }
 
 const CategoriesPage = (props: CategoriesPageProps) => {
@@ -13,12 +12,14 @@ const CategoriesPage = (props: CategoriesPageProps) => {
     <Stack>
       {categories && (
         <Stack>
-          {categories.map(cat => <CategoryModal category={cat} key={cat.id} />)}
+          {categories.map((cat) => (
+            <CategoryEntry category={cat} key={cat.id} />
+          ))}
         </Stack>
       )}
-      <CategoryModal />
+      <CategoryEntry />
     </Stack>
   );
-}
+};
 
 export default CategoriesPage;
