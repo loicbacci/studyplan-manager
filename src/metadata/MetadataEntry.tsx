@@ -16,7 +16,7 @@ import { FiEdit } from "react-icons/fi";
 
 interface MetadataEntryProps {
   left: React.ReactNode;
-  right: React.ReactNode;
+  right?: React.ReactNode;
   popoverHeader?: React.ReactNode;
   popoverBody?: React.ReactNode;
   onEdit: () => void;

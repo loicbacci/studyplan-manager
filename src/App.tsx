@@ -6,6 +6,8 @@ import MetadataPage from "./metadata/MetadataPage";
 import CoursesPage from "./pages/CoursesPage";
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
+import ProgrammesList from "./programmes/ProgrammesList";
+import ProgrammeView from "./programmes/ProgrammeView";
 
 const RequireAuth = ({ children }: { children: React.ReactNode }) => {
   const { isLoggedIn } = useAuth();
@@ -30,6 +32,8 @@ const App = () => {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/metadata" element={<MetadataPage />} />
           <Route path="/courses" element={<CoursesPage />} />
+          <Route path="/programmes" element={<ProgrammesList />} />
+          <Route path="/programmes/:programmeId" element={<ProgrammeView />} />
         </Routes>
       </RequireAuth>
     </Layout>

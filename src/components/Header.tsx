@@ -36,6 +36,7 @@ const Header = (props: HeaderProps) => {
                   <NavLink to="/dashboard">Dashboard</NavLink>
                   <NavLink to="/courses">Courses</NavLink>
                   <NavLink to="/metadata">Metadata</NavLink>
+                  <NavLink to="/programmes">Programmes</NavLink>
                 </>
               )}
             </HStack>

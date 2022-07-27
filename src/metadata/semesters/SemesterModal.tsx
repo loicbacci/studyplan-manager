@@ -12,35 +12,30 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  NumberDecrementStepper,
-  NumberIncrementStepper,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
   Stack,
   useToast
 } from "@chakra-ui/react";
-import { Field, Form, Formik } from "formik";
-import { FiTrash } from "react-icons/fi";
-import { addCategory, deleteCategory, updateCategory } from "../../firebase/categories";
+import {Field, Form, Formik} from "formik";
+import {FiTrash} from "react-icons/fi";
+import {addSemester, deleteSemester, updateSemester} from "../../firebase/semesters";
 
-interface CategoryModalProps {
+interface SemesterModalProps {
   isOpen: boolean;
   onClose: () => void;
-  category?: Category;
+  semester?: Semester;
 }
 
-function CategoryModal(props: CategoryModalProps) {
-  const { category, isOpen, onClose } = props;
+const SemesterModal = (props: SemesterModalProps) => {
+  const {semester, isOpen, onClose} = props;
   const toast = useToast();
 
-  const onSubmit = (name: string, minCredits?: number, notes?: string) => {
-    if (category) {
+  const onSubmit = (name: string) => {
+    if (semester) {
       // EDIT
-      updateCategory(category.id, name, minCredits, notes)
+      updateSemester(semester.id, name)
         .then(() =>
           toast({
-            title: "Successfully edited category",
+            title: "Successfully edited semester",
             status: "success",
             duration: 5000,
             isClosable: true,
@@ -48,7 +43,7 @@ function CategoryModal(props: CategoryModalProps) {
         )
         .catch(() =>
           toast({
-            title: "Failed to edit category",
+            title: "Failed to edit semester",
             status: "error",
             duration: 5000,
             isClosable: true,
@@ -56,10 +51,10 @@ function CategoryModal(props: CategoryModalProps) {
         );
     } else {
       // ADD
-      addCategory(name, minCredits, notes)
+      addSemester(name)
         .then(() =>
           toast({
-            title: "Successfully added category",
+            title: "Successfully added semester",
             status: "success",
             duration: 5000,
             isClosable: true,
@@ -67,7 +62,7 @@ function CategoryModal(props: CategoryModalProps) {
         )
         .catch(() => {
           toast({
-            title: "Failed to add category",
+            title: "Failed to add semester",
             status: "error",
             duration: 5000,
             isClosable: true,
@@ -79,11 +74,11 @@ function CategoryModal(props: CategoryModalProps) {
   };
 
   const onDelete = () => {
-    if (category) {
-      deleteCategory(category.id)
+    if (semester) {
+      deleteSemester(semester.id)
         .then(() =>
           toast({
-            title: "Successfully deleted category",
+            title: "Successfully deleted semester",
             status: "success",
             duration: 5000,
             isClosable: true,
@@ -91,14 +86,14 @@ function CategoryModal(props: CategoryModalProps) {
         )
         .catch(() => {
           toast({
-            title: "Failed to delete category",
+            title: "Failed to delete semester",
             status: "error",
             duration: 5000,
             isClosable: true,
           });
         });
     }
-    
+
     onClose();
   }
 
@@ -109,19 +104,17 @@ function CategoryModal(props: CategoryModalProps) {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <ModalOverlay />
+      <ModalOverlay/>
       <ModalContent>
-        <ModalHeader>{category ? "Edit " : "Add "} Category</ModalHeader>
+        <ModalHeader>{semester ? "Edit " : "Add "} Semester</ModalHeader>
 
         <Formik
           initialValues={{
-            name: category ? category.name : "",
-            minCredits: category ? category.min_credits : undefined,
-            notes: category ? category.notes : undefined
+            name: semester ? semester.name : ""
           }}
           onSubmit={(values, actions) => {
             setTimeout(() => {
-              onSubmit(values.name, values.minCredits, values.notes);
+              onSubmit(values.name);
               actions.setSubmitting(false);
             }, 500);
           }}
@@ -131,42 +124,14 @@ function CategoryModal(props: CategoryModalProps) {
               <ModalBody>
                 <Stack spacing={4}>
                   <Field name="name" validate={validateName}>
-                    {({ field, form }: any) => (
+                    {({field, form}: any) => (
                       <FormControl
                         isInvalid={form.errors.name && form.touched.name}
                         isRequired
                       >
                         <FormLabel>Name</FormLabel>
-                        <Input {...field} placeholder="Enter name" />
+                        <Input {...field} placeholder="Enter name"/>
                         <FormErrorMessage>{form.errors.name}</FormErrorMessage>
-                      </FormControl>
-                    )}
-                  </Field>
-                  
-                  <Field name="minCredits">
-                    {({ field, form }: any) => (
-                      <FormControl>
-                        <FormLabel>Minimum credits</FormLabel>
-                        <NumberInput
-                          {...field}
-                          min={0}
-                          onChange={val => form.setFieldValue(field.name, val)}
-                        >
-                          <NumberInputField placeholder="Minimum number of credits"/>
-                          <NumberInputStepper>
-                            <NumberIncrementStepper />
-                            <NumberDecrementStepper />
-                          </NumberInputStepper>
-                        </NumberInput>
-                      </FormControl>
-                    )}
-                  </Field>
-
-                  <Field name="notes">
-                    {({ field, form }: any) => (
-                      <FormControl>
-                        <FormLabel>Notes</FormLabel>
-                        <Input {...field} placeholder="Enter notes" />
                       </FormControl>
                     )}
                   </Field>
@@ -178,8 +143,8 @@ function CategoryModal(props: CategoryModalProps) {
                   <Button onClick={onClose}>
                     Close
                   </Button>
-                  {category && (
-                    <IconButton colorScheme="red" aria-label="delete" icon={<FiTrash/>} onClick={onDelete} />
+                  {semester && (
+                    <IconButton colorScheme="red" aria-label="delete" icon={<FiTrash/>} onClick={onDelete}/>
                   )}
                   <Button
                     colorScheme="teal"
@@ -198,4 +163,4 @@ function CategoryModal(props: CategoryModalProps) {
   );
 }
 
-export default CategoryModal;
+export default SemesterModal;

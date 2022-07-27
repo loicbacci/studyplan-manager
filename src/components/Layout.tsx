@@ -13,7 +13,7 @@ const Layout = (props: LayoutProps) => {
   return (
     <Flex direction="column">
       <Header loggedIn={loggedIn} />
-      <Container maxW={loggedIn ? "container.sm" : "container.md"}>
+      <Container maxW={loggedIn ? "container.lg" : "container.md"}>
         {children}
       </Container>
     </Flex>

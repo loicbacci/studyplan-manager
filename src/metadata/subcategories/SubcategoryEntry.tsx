@@ -1,4 +1,4 @@
-import { Button, Heading, Text, useDisclosure } from "@chakra-ui/react";
+import {Button, Heading, HStack, Text, useDisclosure} from "@chakra-ui/react";
 import MetadataEntry from "../MetadataEntry";
 import SubCategoryModal from "./SubcategoryModal";
 
@@ -11,11 +11,25 @@ const SubCategoryEntry = (props: SubCategoryEntryProps) => {
   const { subCategory, categories } = props;
   const { isOpen, onOpen, onClose } = useDisclosure();
 
+  const parentCategory = subCategory && categories.find(c => c.id === subCategory.parentId);
+
   return (
     <>
       {subCategory ? (
         <MetadataEntry
-          left={<Text>{subCategory.name}</Text>}
+          left={
+            <HStack>
+              <Text>
+                {subCategory.name}
+              </Text>
+              {parentCategory && (
+                <Text color="gray">
+                  ({parentCategory.name})
+                </Text>
+              )}
+            </HStack>
+
+          }
           right={
             subCategory.min_credits && (
               <Text>Minimum credits {subCategory.min_credits}</Text>

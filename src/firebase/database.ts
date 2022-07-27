@@ -6,6 +6,7 @@ import {
   Unsubscribe,
 } from "firebase/firestore";
 import { app, useAuth } from "./config";
+import minorFunctions from "./programme/minors";
 
 export const db = getFirestore(app);
 
@@ -45,14 +46,33 @@ export const useCollection = <T extends BaseData>(
 
 export const useDatabase = () => {
   return {
+    programmes: useCollection<ProgrammeStructure>("programmes"),
+
     categories: useCollection<Category>("categories"),
     seasons: useCollection<Season>("seasons"),
     semesters: useCollection<Semester>("semesters"),
     subcategories: useCollection<SubCategory>("subcategories"),
     courses: useCollection<Course>("courses"),
+    minors: useCollection<Course>("minors"),
+
   };
 };
 
-export const setupUser = (userId: string) => {
+export const useProgramme = (programmeId: string) => {
+  const { programmes } = useDatabase();
 
+  return {
+    programme: programmes && programmes.find(p => p.id === programmeId),
+    categories: useCollection<Category>(`programmes/${programmeId}/categories`),
+    majors: useCollection<Major>(`programmes/${programmeId}/majors`),
+    minors: useCollection<Minor>(`programmes/${programmeId}/minors`),
+
+    minorFunctions: minorFunctions(programmeId)
+  }
+}
+
+export const useCategory = (programmeId: string, categoryId: string) => {
+  return {
+    subcategories: useCollection<SubCategory>(`programmes/${programmeId}/categories/${categoryId}/subcategories`)
+  }
 }
