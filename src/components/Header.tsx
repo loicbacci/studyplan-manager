@@ -8,18 +8,14 @@ import {
   Spacer,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { auth } from "../firebase/config";
 import NavLink from "./NavLink";
+import { useAuth } from "../lib/auth";
 
-interface HeaderProps {
-  loggedIn?: boolean;
-}
-
-const Header = (props: HeaderProps) => {
-  const { loggedIn } = props;
+const Header = () => {
+  const { isLoggedIn, signOut } = useAuth();
 
   const onLogOutClick = () => {
-    auth.signOut();
+    signOut();
   };
 
   return (
@@ -31,18 +27,16 @@ const Header = (props: HeaderProps) => {
               <Heading size="lg" pr={4}>
                 Study Plan Manager
               </Heading>
-              {loggedIn && (
+              {isLoggedIn && (
                 <>
-                  <NavLink to="/dashboard">Dashboard</NavLink>
-                  <NavLink to="/courses">Courses</NavLink>
-                  <NavLink to="/metadata">Metadata</NavLink>
+                  <NavLink to="/">Home</NavLink>
                   <NavLink to="/programmes">Programmes</NavLink>
                 </>
               )}
             </HStack>
 
             <Spacer />
-            {loggedIn && <Button onClick={onLogOutClick}>Log Out</Button>}
+            {isLoggedIn && <Button onClick={onLogOutClick}>Log Out</Button>}
           </Flex>
         </Container>
       </Box>

@@ -1,19 +1,20 @@
 import { Flex, Container } from "@chakra-ui/react";
 import React from "react";
 import Header from "./Header";
+import { useAuth } from "../lib/auth";
 
 interface LayoutProps {
   children?: React.ReactNode;
-  loggedIn?: boolean;
 }
 
 const Layout = (props: LayoutProps) => {
-  const { children, loggedIn } = props;
+  const { children } = props;
+  const { isLoggedIn } = useAuth();
 
   return (
     <Flex direction="column">
-      <Header loggedIn={loggedIn} />
-      <Container maxW={loggedIn ? "container.lg" : "container.md"}>
+      <Header />
+      <Container maxW={isLoggedIn ? "container.lg" : "container.md"}>
         {children}
       </Container>
     </Flex>
