@@ -6,9 +6,3 @@ export const useMajors = (programmeId: string) => {
     ...useFunctions<Major>(`programmes/${programmeId}/majors`)
   }
 }
-
-export const useMajor = (programmeId: string, majorId: string) => {
-  return {
-    major: useDoc<Major>(`programmes/${programmeId}/majors/${majorId}`)
-  }
-}

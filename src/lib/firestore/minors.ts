@@ -6,9 +6,3 @@ export const useMinors = (programmeId: string) => {
     ...useFunctions<Minor>(`programmes/${programmeId}/minors`)
   }
 }
-
-export const useMinor = (programmeId: string, minorId: string) => {
-  return {
-    minor: useDoc<Minor>(`programmes/${programmeId}/minors/${minorId}`)
-  }
-}

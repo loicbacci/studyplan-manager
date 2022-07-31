@@ -17,7 +17,8 @@ interface Plan extends BaseData {
 }
 
 interface Programme extends BaseData {
-  name: string
+  name: string,
+  min_credits: number
 }
 
 interface Major extends BaseData {

@@ -6,16 +6,16 @@ import { Link as RLink } from "react-router-dom";
 
 interface ProgrammesEntryBaseProps {
   programme?: Programme,
-  addProgramme?: (name: string) => void,
-  renameProgramme?: (newName: string) => void,
+  addProgramme?: (name: string, minCredits: number) => void,
+  updateProgramme?: (name: string, minCredits: number) => void,
   removeProgramme?: () => void
 }
 
 const ProgrammesListEntryBase = (props: ProgrammesEntryBaseProps) => {
-  const { programme, addProgramme, renameProgramme, removeProgramme } = props;
+  const { programme, addProgramme, updateProgramme, removeProgramme } = props;
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const isEditing = programme !== undefined && renameProgramme !== undefined && removeProgramme !== undefined;
+  const isEditing = programme !== undefined && updateProgramme !== undefined && removeProgramme !== undefined;
   const isAdding = addProgramme !== undefined;
 
   const nameField: TextField = {
@@ -27,14 +27,25 @@ const ProgrammesListEntryBase = (props: ProgrammesEntryBaseProps) => {
     isRequired: true
   }
 
+  const minCreditsField: NumberField = {
+    name: "min_credits",
+    initialValue: programme ? programme.min_credits : 0,
+    label: "Minimum credits",
+    placeholder: "Enter minimum credits",
+    undefinedType: "number",
+    minNumber: 0,
+    validate: (v) => v > 0 ? "" : "Please enter minimum credits",
+    isRequired: true
+  }
+
   const onSubmit = (elem: Omit<Programme, "id">) => {
     if (isEditing) {
       // EDIT
-      renameProgramme(elem.name);
+      updateProgramme(elem.name, elem.min_credits);
 
     } else if (isAdding) {
       // ADD
-      addProgramme(elem.name);
+      addProgramme(elem.name, elem.min_credits);
     }
 
     onClose();
@@ -70,7 +81,7 @@ const ProgrammesListEntryBase = (props: ProgrammesEntryBaseProps) => {
       <DataModal
         headerTitle={<Text>{isEditing ? "Edit" : "Add"} Programme</Text>}
         alertTitle={<Text>Delete Programme</Text>}
-        fields={[nameField]}
+        fields={[nameField, minCreditsField]}
         onSubmit={onSubmit}
         onDelete={isEditing ? onDelete : undefined}
         isOpen={isOpen}
@@ -83,23 +94,23 @@ const ProgrammesListEntryBase = (props: ProgrammesEntryBaseProps) => {
 
 interface ProgrammesListEntryProps {
   programme: Programme,
-  renameProgramme: (newName: string) => void,
+  updateProgramme: (name: string, minCredits: number) => void,
   removeProgramme: () => void,
 }
 
 export const ProgrammesListEntry = (props: ProgrammesListEntryProps) => {
-  const { programme, renameProgramme, removeProgramme } = props;
+  const { programme, updateProgramme, removeProgramme } = props;
   return (
     <ProgrammesListEntryBase
       programme={programme}
-      renameProgramme={renameProgramme}
+      updateProgramme={updateProgramme}
       removeProgramme={removeProgramme}
     />
   )
 }
 
 interface AddProgrammeButtonProps {
-  addProgramme: (name: string) => void,
+  addProgramme: (name: string, minCredits: number) => void,
 }
 
 export const AddProgrammeButton = (props: AddProgrammeButtonProps) => {

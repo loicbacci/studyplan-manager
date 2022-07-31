@@ -9,14 +9,14 @@ const ProgrammesList = () => {
   const toast = useToast();
 
 
-  const addProgramme = (name: string) => {
-    add({ name })
+  const addProgramme = (name: string, minCredits: number) => {
+    add({ name, min_credits: minCredits })
       .then(() => toast(toastSuccessOptions("Successfully added programmeView")))
       .catch(() => toast(toastErrorOptions("Failed to add programmeView")));
   }
 
-  const renameProgramme = (programmeId: string) => (newName: string) => {
-    update({ id: programmeId, name: newName })
+  const updateProgramme = (programmeId: string) => (newName: string, minCredits: number) => {
+    update({ id: programmeId, name: newName, min_credits: minCredits })
       .then(() => toast(toastSuccessOptions("Successfully edited programmeView")))
       .catch(() => toast(toastErrorOptions("Failed to edit programmeView")));
   }
@@ -36,7 +36,7 @@ const ProgrammesList = () => {
         {programmes && programmes.map(p => (
           <ProgrammesListEntry
             programme={p}
-            renameProgramme={renameProgramme(p.id)}
+            updateProgramme={updateProgramme(p.id)}
             removeProgramme={removeProgramme(p.id)}
             key={p.id}
           />

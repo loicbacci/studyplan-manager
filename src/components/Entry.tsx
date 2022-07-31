@@ -21,14 +21,15 @@ interface EntryProps {
   popoverHeader?: React.ReactNode;
   popoverBody?: React.ReactNode;
   onEdit: () => void;
-  border?: boolean
+  border?: boolean,
+  iconSize?: string
 }
 
 const Entry = (props: EntryProps) => {
-  const { left, right, onEdit, popoverHeader, popoverBody, border } = props;
+  const { left, right, onEdit, popoverHeader, popoverBody, border, iconSize } = props;
 
   return (
-    <Flex borderWidth={border ? "1px" : ""} borderRadius="md">
+    <Flex borderWidth={border ? "1px" : ""} borderRadius="md" w="100%">
       <Popover>
         <PopoverTrigger>
           <Center ml={border ? 4 : 1}>
@@ -48,7 +49,7 @@ const Entry = (props: EntryProps) => {
       <Spacer/>
       <HStack spacing={4}>
         {right}
-        <IconButton aria-label="Edit" icon={<FiEdit/>} onClick={onEdit}/>
+        <IconButton aria-label="Edit" icon={<FiEdit/>} onClick={onEdit} size={iconSize}/>
       </HStack>
     </Flex>
   );

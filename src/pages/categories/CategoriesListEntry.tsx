@@ -1,19 +1,36 @@
 import React from "react";
-import { Button, Link, Text, useDisclosure } from "@chakra-ui/react";
+import {
+  Badge, Box,
+  Button, Divider, Flex,
+  Heading,
+  HStack, IconButton,
+  Link, Spacer,
+  Stack,
+  Tag,
+  Text,
+  useBreakpointValue,
+  useDisclosure, VStack
+} from "@chakra-ui/react";
 import Entry from "../../components/Entry";
 import { Link as RLink } from "react-router-dom";
 import DataModal from "../../components/DataModal";
+import { FiChevronDown, FiChevronUp, FiEdit } from "react-icons/fi";
+import SubCategoriesList from "../subcategories/SubCategoriesList";
 
 interface CategoriesListEntryBaseProps {
   category?: Category,
+  programmeId?: string,
   addCategory?: (name: string, isMajor: boolean, isMinor: boolean, minCredits?: number, notes?: string) => void,
   updateCategory?: (name: string, isMajor: boolean, isMinor: boolean, minCredits?: number, notes?: string) => void,
-  removeCategory?: () => void
+  removeCategory?: () => void,
 }
 
 const CategoriesListEntryBase = (props: CategoriesListEntryBaseProps) => {
-  const { category, addCategory, updateCategory, removeCategory } = props;
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { category, addCategory, updateCategory, removeCategory, programmeId } = props;
+  const { isOpen: isModalOpen, onOpen: onModalOpen, onClose: onModalClose } = useDisclosure();
+  const { isOpen: isSubOpen, onToggle: onSubToggle } = useDisclosure();
+
+  const isDesktop = useBreakpointValue({ base: false, lg: true });
 
   const isEditing = category !== undefined && updateCategory !== undefined && removeCategory !== undefined;
   const isAdding = addCategory !== undefined;
@@ -56,7 +73,7 @@ const CategoriesListEntryBase = (props: CategoriesListEntryBaseProps) => {
   }
 
   const minCreditsField: NumberField = {
-    name: "minCredits",
+    name: "min_credits",
     initialValue: (category && category.min_credits) ? category.min_credits : undefined,
     label: "Minimum credits",
     placeholder: "Enter minimum credits",
@@ -65,6 +82,23 @@ const CategoriesListEntryBase = (props: CategoriesListEntryBaseProps) => {
   }
 
   const onSubmit = (elem: Omit<Category, "id">) => {
+    const majorMinor = (elem as any).majorMinor;
+
+    if (majorMinor === "Major") {
+      elem.is_major = true;
+      elem.is_minor = false;
+    } else if (majorMinor === "Minor") {
+      elem.is_minor = true;
+      elem.is_major = false;
+    } else {
+      elem.is_minor = false;
+      elem.is_major = false;
+    }
+
+    delete (elem as any).majorMinor
+
+    console.log(elem)
+
     if (isEditing) {
       // EDIT
       // Need to remove the undefined
@@ -74,7 +108,7 @@ const CategoriesListEntryBase = (props: CategoriesListEntryBaseProps) => {
       addCategory(elem.name, elem.is_major, elem.is_minor, elem.min_credits, elem.notes);
     }
 
-    onClose();
+    onModalClose();
   }
 
   const onDelete = () => {
@@ -82,21 +116,77 @@ const CategoriesListEntryBase = (props: CategoriesListEntryBaseProps) => {
       removeCategory();
     }
 
-    onClose();
+    onModalClose();
   }
 
   return (
     <>
       {isEditing ? (
-        <Entry
-          left={<Text>{category.name} </Text>}
-          onEdit={onOpen}
-        />
+        <Stack borderWidth="1px" borderRadius="md" py={2} px={2} w="100%" spacing={0}>
+          {isDesktop ? (
+            <Entry
+              left={
+                <Stack spacing={0}>
+                  <HStack>
+                    {category.is_major && <Tag colorScheme="blue" size="sm">MAJOR</Tag>}
+                    {category.is_minor && <Tag colorScheme="purple" size="sm">MINOR</Tag>}
+                    <Text>{category.name}</Text>
+                  </HStack>
+
+                  {category.notes && <Text color="gray">{category.notes}</Text>}
+                </Stack>
+              }
+              right={category.min_credits && <Text>{category.min_credits} minimum credits</Text>}
+              onEdit={onModalOpen}
+            />
+          ) : (
+            <Flex>
+              <Flex direction="column" alignItems="start" justify="center">
+                {category.is_major && <Tag colorScheme="blue" size="sm">MAJOR</Tag>}
+                {category.is_minor && <Tag colorScheme="purple" size="sm">MINOR</Tag>}
+                <Text>{category.name}</Text>
+              </Flex>
+
+              <Spacer/>
+
+              <IconButton
+                variant="ghost"
+                aria-label="Open menu"
+                icon={isSubOpen ? <FiChevronUp  fontSize="1.25rem"/> : <FiChevronDown fontSize="1.25rem"/>}
+                onClick={onSubToggle}
+                size="sm"
+              />
+            </Flex>
+          )}
+
+          {((isDesktop || (!isDesktop && isSubOpen)) && programmeId) && (
+            <Stack>
+              {!isDesktop && (
+                <Stack spacing={0}>
+                  {category.notes && <Text color="gray">{category.notes}</Text>}
+                  <HStack justify="space-between">
+                    {category.min_credits && <Text>{category.min_credits} minimum credits</Text>}
+                    <IconButton aria-label="Edit" icon={<FiEdit/>} onClick={onModalOpen} size="sm"/>
+                  </HStack>
+                  <Divider py={1} />
+                </Stack>
+              )}
+
+              <Box pl={4}>
+                <Box w="100%" pl={4} borderLeft="1px" borderColor="gray.400">
+                  <SubCategoriesList programmeId={programmeId} categoryId={category.id}/>
+                </Box>
+              </Box>
+            </Stack>
+
+          )}
+        </Stack>
       ) : (
-        <Button onClick={onOpen} w="fit-content" size="sm">
+        <Button onClick={onModalOpen} w="fit-content" size="sm">
           Add category
         </Button>
       )}
+
 
       <DataModal
         headerTitle={<Text>{isEditing ? "Edit" : "Add"} Category</Text>}
@@ -104,8 +194,8 @@ const CategoriesListEntryBase = (props: CategoriesListEntryBaseProps) => {
         fields={[nameField, isMajorMinorField, minCreditsField, notesField]}
         onSubmit={onSubmit}
         onDelete={isEditing ? onDelete : undefined}
-        isOpen={isOpen}
-        onClose={onClose}
+        isOpen={isModalOpen}
+        onClose={onModalClose}
       />
     </>
 
@@ -115,17 +205,19 @@ const CategoriesListEntryBase = (props: CategoriesListEntryBaseProps) => {
 interface CategoriesListEntryProps {
   category: Category,
   updateCategory?: (name: string, isMajor: boolean, isMinor: boolean, minCredits?: number, notes?: string) => void,
-  removeCategory?: () => void
+  removeCategory?: () => void,
+  programmeId: string
 }
 
 export const CategoriesListEntry = (props: CategoriesListEntryProps) => {
-  const {  category, updateCategory, removeCategory } = props;
+  const { category, updateCategory, removeCategory, programmeId } = props;
 
   return (
     <CategoriesListEntryBase
       category={category}
       updateCategory={updateCategory}
       removeCategory={removeCategory}
+      programmeId={programmeId}
     />
   )
 }
@@ -134,7 +226,7 @@ interface AddCategoryButtonProps {
   addCategory?: (name: string, isMajor: boolean, isMinor: boolean, minCredits?: number, notes?: string) => void,
 }
 
-export const AddMajorButton = (props: AddCategoryButtonProps) => {
+export const AddCategoryButton = (props: AddCategoryButtonProps) => {
   const { addCategory } = props;
 
   return (

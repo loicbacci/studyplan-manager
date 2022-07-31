@@ -10,7 +10,7 @@ import {
   Heading,
   Spacer,
   Stack,
-  Text
+  Text, useBreakpointValue
 } from "@chakra-ui/react";
 import { useProgramme } from "../../lib/firestore/programmes";
 import MajorsList from "../majors/MajorsList";
@@ -35,6 +35,8 @@ const ProgrammeView = (props: ProgrammePageProps) => {
   const { programmeId } = props;
   const { programme } = useProgramme(programmeId);
 
+  const isDesktop = useBreakpointValue({ base: false, lg: true });
+
   if (!programme) {
     return (
       <Text>Programme {programmeId} not found.</Text>
@@ -43,32 +45,26 @@ const ProgrammeView = (props: ProgrammePageProps) => {
 
   return (
     <Stack spacing={4}>
-      <Breadcrumb>
-        <BreadcrumbItem>
-          <BreadcrumbLink as={RLink} to={"/programmes"}>
-            Programmes
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-
-        <BreadcrumbItem isCurrentPage>
-          <BreadcrumbLink color="gray" as={RLink} to={`/programmes/${programmeId}`}>
-            {programme.name}
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-      </Breadcrumb>
-
       <Heading mb={2}>{programme.name}</Heading>
 
-      <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-        <GridItem>
+      {isDesktop ? (
+        <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+          <GridItem>
+            <MajorsList programmeId={programme.id} />
+          </GridItem>
+          <GridItem>
+            <MinorsList programmeId={programme.id} />
+          </GridItem>
+        </Grid>
+      ) : (
+        <Stack>
           <MajorsList programmeId={programme.id} />
-        </GridItem>
-        <GridItem>
           <MinorsList programmeId={programme.id} />
-        </GridItem>
-      </Grid>
+        </Stack>
+      )}
 
-      <CategoriesList programmeId={programme.id} />
+
+      <CategoriesList programme={programme} />
 
     </Stack>
   )

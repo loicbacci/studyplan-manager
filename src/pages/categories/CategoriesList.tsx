@@ -1,21 +1,19 @@
 import React from "react";
-import { Heading, Stack, Text, useToast } from "@chakra-ui/react";
+import { Flex, Heading, HStack, Spacer, Stack, Text, useBreakpointValue, useToast } from "@chakra-ui/react";
 import { toastErrorOptions, toastSuccessOptions } from "../../lib/chakraUtils";
-import { AddMajorButton, CategoriesListEntry } from "./CategoriesListEntry";
-import { useProgramme } from "../../lib/firestore/programmes";
+import { AddCategoryButton, CategoriesListEntry } from "./CategoriesListEntry";
 import { useCategories } from "../../lib/firestore/categories";
 
 
 interface CategoriesListProps {
-  programmeId: string
+  programme: Programme
 }
 
 const CategoriesList = (props: CategoriesListProps) => {
-  const { programmeId } = props;
-
-  const { categories, add, update, remove } = useCategories(programmeId);
+  const { programme } = props;
+  const { categories, add, update, remove } = useCategories(programme.id);
   const toast = useToast();
-
+  const isDesktop = useBreakpointValue({ base: false, lg: true });
 
   const addCategory = (name: string, isMajor: boolean, isMinor: boolean, minCredits?: number, notes?: string) => {
     const elem: Omit<Category, "id"> = {
@@ -41,6 +39,8 @@ const CategoriesList = (props: CategoriesListProps) => {
       notes
     }
 
+    console.log(minCredits)
+
     update(elem)
       .then(() => toast(toastSuccessOptions("Successfully edited category")))
       .catch(() => toast(toastErrorOptions("Failed to edit category")));
@@ -54,31 +54,43 @@ const CategoriesList = (props: CategoriesListProps) => {
 
   return (
     <Stack
-      borderWidth="1px"
-      borderRadius="md"
-      py={2}
-      px={4}
       w="100%"
     >
       <Heading size="md" mb={2}>
-        Categories
+        Structure
       </Heading>
 
 
       {(categories && categories.length === 0) && <Text color="gray">No categories yet</Text>}
-      <Stack>
-        {categories && categories.map(m => (
+      <Stack w="100%" borderWidth="1px" borderRadius="md" py={2} px={2} >
+        {isDesktop ? (
+          <HStack justify="space-between">
+            <Heading size="sm">{programme.name}</Heading>
+            <Text>{programme.min_credits} minimum credits</Text>
+          </HStack>
+        ) : (
+          <Stack>
+            <Heading size="sm">{programme.name}</Heading>
+            <Text>{programme.min_credits} minimum credits</Text>
+          </Stack>
+        )}
+
+
+        {categories && categories.map(category => (
           <CategoriesListEntry
-            category={m}
-            updateCategory={updateCategory(m.id)}
-            removeCategory={removeCategory(m.id)}
-            key={m.id}
+            category={category}
+            programmeId={programme.id}
+            updateCategory={updateCategory(category.id)}
+            removeCategory={removeCategory(category.id)}
+            key={category.id}
           />
+
         ))}
+
+        <AddCategoryButton addCategory={addCategory}/>
       </Stack>
 
 
-      <AddMajorButton addCategory={addCategory}/>
     </Stack>
   )
 }

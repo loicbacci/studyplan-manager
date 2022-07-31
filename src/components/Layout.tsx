@@ -12,7 +12,7 @@ const Layout = (props: LayoutProps) => {
   const { isLoggedIn } = useAuth();
 
   return (
-    <Flex direction="column">
+    <Flex direction="column" mb={16}>
       <Header />
       <Container maxW={isLoggedIn ? "container.lg" : "container.md"}>
         {children}

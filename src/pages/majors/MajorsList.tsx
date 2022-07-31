@@ -1,9 +1,18 @@
 import React from "react";
 import { useMajors } from "../../lib/firestore/majors";
-import { Heading, Stack, Text, useToast } from "@chakra-ui/react";
+import {
+  Heading,
+  HStack,
+  IconButton,
+  Stack,
+  Text,
+  useBreakpointValue,
+  useDisclosure,
+  useToast
+} from "@chakra-ui/react";
 import { toastErrorOptions, toastSuccessOptions } from "../../lib/chakraUtils";
 import { AddMajorButton, MajorsListEntry } from "./MajorsListEntry";
-import { useParams } from "react-router-dom";
+import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 interface MajorsListProps {
   programmeId: string
@@ -11,6 +20,8 @@ interface MajorsListProps {
 
 const MajorsList = (props: MajorsListProps) => {
   const { programmeId } = props;
+  const isDesktop = useBreakpointValue({ base: false, lg: true });
+  const { isOpen, onToggle } = useDisclosure();
 
   const { majors, add, update, remove } = useMajors(programmeId);
   const toast = useToast();
@@ -34,19 +45,8 @@ const MajorsList = (props: MajorsListProps) => {
       .catch(() => toast(toastErrorOptions("Failed to remove major")));
   }
 
-  return (
-    <Stack
-      borderWidth="1px"
-      borderRadius="md"
-      py={2}
-      px={4}
-      w="100%"
-    >
-      <Heading size="md" mb={2}>
-        Majors
-      </Heading>
-
-
+  const Body = (
+    <>
       {(majors && majors.length === 0) && <Text color="gray">No majors yet</Text>}
       <Stack>
         {majors && majors.map(m => (
@@ -59,8 +59,35 @@ const MajorsList = (props: MajorsListProps) => {
         ))}
       </Stack>
 
-
       <AddMajorButton addMajor={addMajor}/>
+    </>
+  )
+
+  return (
+    <Stack
+      borderWidth="1px"
+      borderRadius="md"
+      py={{ base: 1, lg: 2 }}
+      pb={2}
+      px={4}
+      w="100%"
+    >
+      <HStack justify="space-between">
+        <Heading size="md" mb={{ base: 0, lg: 2 }}>
+          Majors
+        </Heading>
+
+        {!isDesktop && (
+          <IconButton
+            variant="ghost"
+            aria-label="Open menu"
+            icon={isOpen ? <FiChevronUp/> : <FiChevronDown fontSize="1.25rem"/>}
+            onClick={onToggle}
+          />
+        )}
+      </HStack>
+
+      {isDesktop ? Body : isOpen && Body}
     </Stack>
   )
 }
