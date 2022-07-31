@@ -6,10 +6,13 @@ import {
   doc,
   onSnapshot,
   Unsubscribe,
-  updateDoc as updateDocF
+  updateDoc as updateDocF,
+  DocumentReference,
+  DocumentData
 } from "firebase/firestore";
 import { useAuth } from "../auth";
 import { db } from "./firestore";
+import { removeUndefined } from "../firebaseUtils";
 
 export const useCollection = <T extends BaseData>(collectionName: string): T[] | null => {
   const [elems, setElems] = useState(null as T[] | null);
@@ -70,17 +73,18 @@ export const useDoc = <T extends BaseData>(docPath: string): T | null => {
 }
 
 export const updateDoc = <T>(userId: string, docPath: string, newDoc: NonNullable<T>) => {
-  console.log(newDoc)
+  const remUndefDoc = removeUndefined(newDoc as any);
   return updateDocF(
     doc(db, "users", userId, docPath),
-    newDoc
+    remUndefDoc
   )
 }
 
 export const addDoc = <T>(userId: string, collectionPath: string, newDoc: T) => {
+  const remUndefDoc = removeUndefined(newDoc as any);
   return addDocF(
     collection(db, "users", userId, collectionPath),
-    newDoc
+    remUndefDoc
   )
 }
 
@@ -114,7 +118,6 @@ export const useFunctions = <T extends BaseData>(collectionPath: string) => {
     }
 
     const newUpdate = (newDoc: T) => {
-      console.log("what", newDoc)
       return updateDoc(userId, getDocPath(newDoc.id), removeId(newDoc))
     }
 
@@ -133,8 +136,8 @@ export const useFunctions = <T extends BaseData>(collectionPath: string) => {
 
 
   return {
-    update: update,// as (newDoc: T) => Promise<void>,
-    add: add,// as (newDoc: Omit<T, "id">) => Promise<DocumentReference<DocumentData>>,
-    remove: remove// as (docId: string) => Promise<void>
+    update: update as (newDoc: T) => Promise<void>,
+    add: add as (newDoc: Omit<T, "id">) => Promise<DocumentReference<DocumentData>>,
+    remove: remove as (docId: string) => Promise<void>
   };
 }

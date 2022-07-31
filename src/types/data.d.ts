@@ -30,9 +30,8 @@ interface Minor extends BaseData {
 
 interface Category extends BaseData {
   name: string;
-  subcategoryIds: string[];
   is_major: boolean;
-  is_minor: boolean
+  is_minor: boolean;
   min_credits?: number;
   notes?: string;
 }
@@ -41,8 +40,6 @@ interface SubCategory extends BaseData {
   name: string;
   min_credits?: number;
   notes?: string;
-
-  parentId: string
 }
 
 

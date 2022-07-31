@@ -15,11 +15,11 @@ import {
   NumberIncrementStepper,
   NumberInput,
   NumberInputField,
-  NumberInputStepper,
+  NumberInputStepper, Radio, RadioGroup,
   Select,
-  Stack
+  Stack, Textarea
 } from "@chakra-ui/react";
-import { Field, Form, Formik } from "formik";
+import { Field, FieldProps, Form, Formik } from "formik";
 import { ReactNode } from "react";
 import DeleteButton from "./DeleteButton";
 
@@ -64,9 +64,39 @@ function DataModal<T>(props: DataModalProps<T>) {
               <ModalBody>
                 <Stack spacing={4}>
                   {fields.map(f => {
+                    if (f.isRadio) {
+                      // RADIO
+                      if (typeof f.initialValue === "string" || f.undefinedType === "string") {
+                        return (
+                          <Field name={f.name} validate={f.validate}>
+                            {({ field, form }: any) => (
+                              <FormControl
+                                id={f.name}
+                                isInvalid={form.errors[f.name] && form.touched[f.name]}
+                                isRequired={f.isRequired}
+                              >
+                                <FormLabel htmlFor={f.name}>
+                                  {f.label}
+                                </FormLabel>
+                                <RadioGroup {...field} id={f.name}>
+                                  <Stack direction='row'>
+                                    {f.possibleValues && f.possibleValues.map(val => (
+                                      <Radio {...field} value={val}>
+                                        {val}
+                                      </Radio>
+                                    ))}
+                                  </Stack>
+                                </RadioGroup>
+                                <FormErrorMessage>{form.errors.parentId}</FormErrorMessage>
+                              </FormControl>
+                            )}
+                          </Field>
+                        )
+                      }
+                    }
                     if (f.possibleValues) {
                       // SELECT
-                      if (typeof f.initialValue === "string") {
+                      if (typeof f.initialValue === "string" || f.undefinedType === "string") {
                         // SELECT OF STRINGS
                         return (
                           <Field as="select" name={f.name} validate={f.validate}>
@@ -90,7 +120,8 @@ function DataModal<T>(props: DataModalProps<T>) {
                         )
                       }
                     }
-                    if (typeof f.initialValue === "string") {
+
+                    if (typeof f.initialValue === "string" || f.undefinedType === "string") {
                       return (
                         <Field name={f.name} validate={f.validate}>
                           {({ field, form }: any) => (
@@ -99,14 +130,18 @@ function DataModal<T>(props: DataModalProps<T>) {
                               isRequired={f.isRequired}
                             >
                               <FormLabel>{f.label}</FormLabel>
-                              <Input {...field} placeholder={f.placeholder}/>
+                              {f.textArea ? (
+                                <Textarea {...field} placeholder={f.placeholder} />
+                              ) : (
+                                <Input {...field} placeholder={f.placeholder}/>
+                              )}
                               <FormErrorMessage>{form.errors[f.name]}</FormErrorMessage>
                             </FormControl>
                           )}
                         </Field>
                       )
                     }
-                    if (typeof f.initialValue === "number") {
+                    if (typeof f.initialValue === "number" || f.undefinedType === "number") {
                       return (
                         <Field name={f.name} validate={f.validate}>
                           {({ field, form }: any) => (
@@ -134,7 +169,7 @@ function DataModal<T>(props: DataModalProps<T>) {
                       )
                     }
 
-                    return <div>oops</div>
+                    return <div>Unknown field</div>
                   })}
                 </Stack>
               </ModalBody>

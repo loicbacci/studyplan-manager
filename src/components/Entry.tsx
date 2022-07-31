@@ -1,4 +1,5 @@
 import {
+  Center,
   Flex,
   HStack,
   IconButton,
@@ -20,15 +21,20 @@ interface EntryProps {
   popoverHeader?: React.ReactNode;
   popoverBody?: React.ReactNode;
   onEdit: () => void;
+  border?: boolean
 }
 
 const Entry = (props: EntryProps) => {
-  const { left, right, onEdit, popoverHeader, popoverBody } = props;
+  const { left, right, onEdit, popoverHeader, popoverBody, border } = props;
 
   return (
-    <Flex>
+    <Flex borderWidth={border ? "1px" : ""} borderRadius="md">
       <Popover>
-        <PopoverTrigger>{left}</PopoverTrigger>
+        <PopoverTrigger>
+          <Center ml={border ? 4 : 1}>
+            {left}
+          </Center>
+        </PopoverTrigger>
         {(popoverHeader || popoverBody) && (
           <PopoverContent>
             <PopoverArrow/>
