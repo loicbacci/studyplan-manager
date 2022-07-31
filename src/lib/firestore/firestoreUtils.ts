@@ -6,9 +6,7 @@ import {
   doc,
   onSnapshot,
   Unsubscribe,
-  updateDoc as updateDocF,
-  DocumentReference,
-  DocumentData
+  updateDoc as updateDocF
 } from "firebase/firestore";
 import { useAuth } from "../auth";
 import { db } from "./firestore";
@@ -94,9 +92,12 @@ export const deleteDoc = (userId: string, docPath: string) => {
 export const useFunctions = <T extends BaseData>(collectionPath: string) => {
   const { userId } = useAuth();
 
-  const [update, setUpdate] = useState((() => () => {}) as any);
-  const [add, setAdd] = useState((() => () => {}) as any);
-  const [remove, setRemove] = useState((() => () => {}) as any);
+  const [update, setUpdate] = useState((() => () => {
+  }) as any);
+  const [add, setAdd] = useState((() => () => {
+  }) as any);
+  const [remove, setRemove] = useState((() => () => {
+  }) as any);
 
 
   useEffect(() => {
@@ -126,7 +127,7 @@ export const useFunctions = <T extends BaseData>(collectionPath: string) => {
     }
 
     setUpdate(() => newUpdate);
-    setAdd(() =>newAdd);
+    setAdd(() => newAdd);
     setRemove(() => newRemove);
   }, [collectionPath, userId])
 

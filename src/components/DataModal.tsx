@@ -4,7 +4,6 @@ import {
   FormErrorMessage,
   FormLabel,
   HStack,
-  IconButton,
   Input,
   Modal,
   ModalBody,
@@ -21,7 +20,6 @@ import {
   Stack
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
-import { FiTrash } from "react-icons/fi";
 import { ReactNode } from "react";
 import DeleteButton from "./DeleteButton";
 
@@ -42,7 +40,7 @@ interface DataModalProps<T> {
 }
 
 function DataModal<T>(props: DataModalProps<T>) {
-  const {  headerTitle, alertTitle, fields, onSubmit, onDelete, isOpen, onClose } = props;
+  const { headerTitle, alertTitle, fields, onSubmit, onDelete, isOpen, onClose } = props;
 
   const initialValues = fields.reduce((rs, v) => ({ ...rs, [v.name]: v.initialValue }), {})
 
@@ -149,7 +147,8 @@ function DataModal<T>(props: DataModalProps<T>) {
                   {onDelete && (
                     <DeleteButton
                       alertTitle={alertTitle}
-                      onCancel={() => {}}
+                      onCancel={() => {
+                      }}
                       onDelete={onDelete}
                     />
                   )}
