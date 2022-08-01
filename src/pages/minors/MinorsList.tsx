@@ -21,7 +21,6 @@ interface MinorsListProps {
 
 const MinorsList = (props: MinorsListProps) => {
   const { programmeId } = props;
-  const isDesktop = useBreakpointValue({ base: false, lg: true });
   const { isOpen, onToggle } = useDisclosure();
 
   const { minors, add, update, remove } = useMinors(programmeId);
@@ -69,8 +68,8 @@ const MinorsList = (props: MinorsListProps) => {
       borderWidth="1px"
       borderRadius="md"
       py={{ base: 1, lg: 2 }}
-      pb={2}
-      px={4}
+      pb={{ base: 1, lg: 2 }}
+      px={{ base: 2, lg: 4 }}
       w="100%"
     >
       <HStack justify="space-between">
@@ -78,17 +77,15 @@ const MinorsList = (props: MinorsListProps) => {
           Minors
         </Heading>
 
-        {!isDesktop && (
-          <IconButton
-            variant="ghost"
-            aria-label="Open menu"
-            icon={isOpen ? <FiChevronUp/> : <FiChevronDown fontSize="1.25rem"/>}
-            onClick={onToggle}
-          />
-        )}
+        <IconButton
+          variant="ghost"
+          aria-label="Open menu"
+          icon={isOpen ? <FiChevronUp/> : <FiChevronDown fontSize="1.25rem"/>}
+          onClick={onToggle}
+        />
       </HStack>
 
-      {isDesktop ? Body : isOpen && Body}
+      {isOpen && Body}
     </Stack>
   )
 }

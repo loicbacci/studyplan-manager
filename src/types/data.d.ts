@@ -18,7 +18,8 @@ interface Plan extends BaseData {
 
 interface Programme extends BaseData {
   name: string,
-  min_credits: number
+  min_credits: number,
+  notes?: string
 }
 
 interface Major extends BaseData {
@@ -50,6 +51,8 @@ interface Season extends BaseData {
 
 interface Semester extends BaseData {
   name: string;
+  index: number;
+  season_id: string;
 }
 
 

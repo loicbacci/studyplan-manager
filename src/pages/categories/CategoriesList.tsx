@@ -1,8 +1,19 @@
-import React from "react";
-import { Flex, Heading, HStack, Spacer, Stack, Text, useBreakpointValue, useToast } from "@chakra-ui/react";
+import React, { useEffect } from "react";
+import {
+  Flex,
+  Heading,
+  HStack, IconButton,
+  Spacer,
+  Stack,
+  Text,
+  useBreakpointValue,
+  useDisclosure,
+  useToast
+} from "@chakra-ui/react";
 import { toastErrorOptions, toastSuccessOptions } from "../../lib/chakraUtils";
 import { AddCategoryButton, CategoriesListEntry } from "./CategoriesListEntry";
 import { useCategories } from "../../lib/firestore/categories";
+import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 
 interface CategoriesListProps {
@@ -14,6 +25,7 @@ const CategoriesList = (props: CategoriesListProps) => {
   const { categories, add, update, remove } = useCategories(programme.id);
   const toast = useToast();
   const isDesktop = useBreakpointValue({ base: false, lg: true });
+  const { isOpen, onToggle } = useDisclosure();
 
   const addCategory = (name: string, isMajor: boolean, isMinor: boolean, minCredits?: number, notes?: string) => {
     const elem: Omit<Category, "id"> = {
@@ -52,17 +64,10 @@ const CategoriesList = (props: CategoriesListProps) => {
       .catch(() => toast(toastErrorOptions("Failed to remove category")));
   }
 
-  return (
-    <Stack
-      w="100%"
-    >
-      <Heading size="md" mb={2}>
-        Structure
-      </Heading>
-
-
+  const Body = (
+    <>
       {(categories && categories.length === 0) && <Text color="gray">No categories yet</Text>}
-      <Stack w="100%" borderWidth="1px" borderRadius="md" py={2} px={2} >
+      <Stack w="100%">
         {isDesktop ? (
           <HStack justify="space-between">
             <Heading size="sm">{programme.name}</Heading>
@@ -89,8 +94,34 @@ const CategoriesList = (props: CategoriesListProps) => {
 
         <AddCategoryButton addCategory={addCategory}/>
       </Stack>
+    </>
+  )
+
+  return (
+    <Stack
+      borderWidth="1px"
+      borderRadius="md"
+      py={{ base: 1, lg: 2 }}
+      pb={{ base: 1, lg: 2 }}
+      px={{ base: 2, lg: 4 }}
+      w="100%"
+    >
+      <HStack justify="space-between">
+        <Heading size="md" mb={2}>
+          Structure
+        </Heading>
+
+        <IconButton
+          variant="ghost"
+          aria-label="Open menu"
+          icon={isOpen ? <FiChevronUp/> : <FiChevronDown fontSize="1.25rem"/>}
+          onClick={onToggle}
+        />
+      </HStack>
 
 
+
+      {isOpen && Body}
     </Stack>
   )
 }

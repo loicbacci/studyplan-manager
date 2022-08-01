@@ -122,7 +122,7 @@ const CategoriesListEntryBase = (props: CategoriesListEntryBaseProps) => {
   return (
     <>
       {isEditing ? (
-        <Stack borderWidth="1px" borderRadius="md" py={2} px={2} w="100%" spacing={0}>
+        <Stack borderWidth="1px" borderRadius="md" py={{ base: 1, lg: 2 }} px={2} w="100%" spacing={0}>
           {isDesktop ? (
             <Entry
               left={
@@ -145,6 +145,7 @@ const CategoriesListEntryBase = (props: CategoriesListEntryBaseProps) => {
                 {category.is_major && <Tag colorScheme="blue" size="sm">MAJOR</Tag>}
                 {category.is_minor && <Tag colorScheme="purple" size="sm">MINOR</Tag>}
                 <Text>{category.name}</Text>
+                {category.min_credits && <Text color="gray">{category.min_credits} min credits</Text>}
               </Flex>
 
               <Spacer/>
@@ -164,10 +165,7 @@ const CategoriesListEntryBase = (props: CategoriesListEntryBaseProps) => {
               {!isDesktop && (
                 <Stack spacing={0}>
                   {category.notes && <Text color="gray">{category.notes}</Text>}
-                  <HStack justify="space-between">
-                    {category.min_credits && <Text>{category.min_credits} minimum credits</Text>}
-                    <IconButton aria-label="Edit" icon={<FiEdit/>} onClick={onModalOpen} size="sm"/>
-                  </HStack>
+                  <IconButton aria-label="Edit" icon={<FiEdit/>} onClick={onModalOpen} size="sm" w="fit-content"/>
                   <Divider py={1} />
                 </Stack>
               )}

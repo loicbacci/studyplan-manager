@@ -5,7 +5,10 @@ interface MyField<T> {
   placeholder: string
   validate?: (value: T) => string
   isRequired?: boolean
+
   possibleValues?: T[],
+  possibleValuesLabels?: string[],
+
   isRadio?: boolean,
   minNumber?: number,
   maxNumber?: number,

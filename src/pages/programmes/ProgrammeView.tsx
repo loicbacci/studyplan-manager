@@ -1,21 +1,12 @@
 import React from "react";
-import { Link as RLink, useParams } from "react-router-dom";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  Flex,
-  Grid,
-  GridItem,
-  Heading,
-  Spacer,
-  Stack,
-  Text, useBreakpointValue
-} from "@chakra-ui/react";
+import { useParams } from "react-router-dom";
+import { Divider, Grid, Heading, HStack, Stack, Text, useBreakpointValue } from "@chakra-ui/react";
 import { useProgramme } from "../../lib/firestore/programmes";
 import MajorsList from "../majors/MajorsList";
 import MinorsList from "../minors/MinorsList";
 import CategoriesList from "../categories/CategoriesList";
+import SeasonsList from "../seasons/SeasonsList";
+import SemestersList from "../semesters/SemestersList";
 
 const ProgrammeViewLoader = () => {
   const { programmeId } = useParams();
@@ -47,24 +38,33 @@ const ProgrammeView = (props: ProgrammePageProps) => {
     <Stack spacing={4}>
       <Heading mb={2}>{programme.name}</Heading>
 
-      {isDesktop ? (
-        <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-          <GridItem>
-            <MajorsList programmeId={programme.id} />
-          </GridItem>
-          <GridItem>
-            <MinorsList programmeId={programme.id} />
-          </GridItem>
-        </Grid>
-      ) : (
-        <Stack>
-          <MajorsList programmeId={programme.id} />
-          <MinorsList programmeId={programme.id} />
-        </Stack>
+      {programme.notes && (
+        <Text>{programme.notes}</Text>
       )}
 
+      <CategoriesList programme={programme}/>
 
-      <CategoriesList programme={programme} />
+      <Divider />
+
+      {isDesktop ? (
+        <Stack>
+          <HStack align="start">
+            <MajorsList programmeId={programme.id}/>
+            <MinorsList programmeId={programme.id}/>
+          </HStack>
+          <HStack align="start">
+            <SeasonsList programmeId={programme.id}/>
+            <SemestersList programmeId={programme.id}/>
+          </HStack>
+        </Stack>
+      ) : (
+        <Stack>
+          <MajorsList programmeId={programme.id}/>
+          <MinorsList programmeId={programme.id}/>
+          <SeasonsList programmeId={programme.id}/>
+          <SemestersList programmeId={programme.id}/>
+        </Stack>
+      )}
 
     </Stack>
   )

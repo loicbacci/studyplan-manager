@@ -9,14 +9,14 @@ const ProgrammesList = () => {
   const toast = useToast();
 
 
-  const addProgramme = (name: string, minCredits: number) => {
-    add({ name, min_credits: minCredits })
+  const addProgramme = (name: string, minCredits: number, notes?: string) => {
+    add({ name, min_credits: minCredits, notes })
       .then(() => toast(toastSuccessOptions("Successfully added programmeView")))
       .catch(() => toast(toastErrorOptions("Failed to add programmeView")));
   }
 
-  const updateProgramme = (programmeId: string) => (newName: string, minCredits: number) => {
-    update({ id: programmeId, name: newName, min_credits: minCredits })
+  const updateProgramme = (programmeId: string) => (newName: string, minCredits: number, notes?: string) => {
+    update({ id: programmeId, name: newName, min_credits: minCredits, notes })
       .then(() => toast(toastSuccessOptions("Successfully edited programmeView")))
       .catch(() => toast(toastErrorOptions("Failed to edit programmeView")));
   }

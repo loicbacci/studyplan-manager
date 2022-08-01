@@ -107,9 +107,9 @@ function DataModal<T>(props: DataModalProps<T>) {
                               >
                                 <FormLabel>{f.label}</FormLabel>
                                 <Select {...field} placeholder={f.placeholder}>
-                                  {f.possibleValues && f.possibleValues.map(val => (
+                                  {f.possibleValues && f.possibleValues.map((val, i) => (
                                     <option value={val}>
-                                      {val}
+                                      {f.possibleValuesLabels ? f.possibleValuesLabels[i] : val}
                                     </option>
                                   ))}
                                 </Select>

@@ -1,13 +1,13 @@
 import React from "react";
 import DataModal from "../../components/DataModal";
-import { Box, Button, Link, Text, useDisclosure } from "@chakra-ui/react";
+import { Box, Button, Link, Stack, Text, useDisclosure } from "@chakra-ui/react";
 import Entry from "../../components/Entry";
 import { Link as RLink } from "react-router-dom";
 
 interface ProgrammesEntryBaseProps {
   programme?: Programme,
-  addProgramme?: (name: string, minCredits: number) => void,
-  updateProgramme?: (name: string, minCredits: number) => void,
+  addProgramme?: (name: string, minCredits: number, notes?: string) => void,
+  updateProgramme?: (name: string, minCredits: number, notes?: string) => void,
   removeProgramme?: () => void
 }
 
@@ -37,15 +37,23 @@ const ProgrammesListEntryBase = (props: ProgrammesEntryBaseProps) => {
     validate: (v) => v > 0 ? "" : "Please enter minimum credits",
     isRequired: true
   }
+  const notesField: TextField = {
+    name: "notes",
+    initialValue: (programme && programme.notes) ? programme.notes : undefined,
+    label: "Notes",
+    placeholder: "Enter notes",
+    undefinedType: "string",
+    textArea: true
+  }
 
   const onSubmit = (elem: Omit<Programme, "id">) => {
     if (isEditing) {
       // EDIT
-      updateProgramme(elem.name, elem.min_credits);
+      updateProgramme(elem.name, elem.min_credits, elem.notes);
 
     } else if (isAdding) {
       // ADD
-      addProgramme(elem.name, elem.min_credits);
+      addProgramme(elem.name, elem.min_credits, elem.notes);
     }
 
     onClose();
@@ -64,9 +72,13 @@ const ProgrammesListEntryBase = (props: ProgrammesEntryBaseProps) => {
       {isEditing ? (
         <Entry
           left={
+          <Stack spacing={0}>
             <Link as={RLink} to={`/programmes/${programme.id}`}>
               {programme.name}
             </Link>
+            {programme.notes && <Text color="gray">{programme.notes}</Text>}
+          </Stack>
+
           }
           onEdit={onOpen}
           border
@@ -81,7 +93,7 @@ const ProgrammesListEntryBase = (props: ProgrammesEntryBaseProps) => {
       <DataModal
         headerTitle={<Text>{isEditing ? "Edit" : "Add"} Programme</Text>}
         alertTitle={<Text>Delete Programme</Text>}
-        fields={[nameField, minCreditsField]}
+        fields={[nameField, minCreditsField, notesField]}
         onSubmit={onSubmit}
         onDelete={isEditing ? onDelete : undefined}
         isOpen={isOpen}
@@ -94,7 +106,7 @@ const ProgrammesListEntryBase = (props: ProgrammesEntryBaseProps) => {
 
 interface ProgrammesListEntryProps {
   programme: Programme,
-  updateProgramme: (name: string, minCredits: number) => void,
+  updateProgramme: (name: string, minCredits: number, notes?: string) => void,
   removeProgramme: () => void,
 }
 
@@ -110,7 +122,7 @@ export const ProgrammesListEntry = (props: ProgrammesListEntryProps) => {
 }
 
 interface AddProgrammeButtonProps {
-  addProgramme: (name: string, minCredits: number) => void,
+  addProgramme: (name: string, minCredits: number, notes?: string) => void,
 }
 
 export const AddProgrammeButton = (props: AddProgrammeButtonProps) => {
