@@ -17,11 +17,23 @@ import { FiMenu } from "react-icons/fi";
 const Header = () => {
   const { isLoggedIn, signOut } = useAuth();
   const isDesktop = useBreakpointValue({ base: false, lg: true });
-  const { isOpen, onToggle } = useDisclosure();
+  const { isOpen, onToggle, onClose } = useDisclosure();
 
   const onLogOutClick = () => {
     signOut();
+    onClose();
   };
+
+  const Links = (
+    <HStack spacing={4}>
+      <NavLink to="/" onClick={onClose}>Home</NavLink>
+      <NavLink to="/programmes" onClick={onClose}>Programmes</NavLink>
+    </HStack>
+  );
+
+  const LogOutButton = (
+    <Button onClick={onLogOutClick}>Log Out</Button>
+  )
 
   return (
     <Box as="section" pb={{ base: 4, md: 6 }}>
@@ -34,15 +46,8 @@ const Header = () => {
 
             {isDesktop ? (
               <Flex justify="space-between" flex="1">
-                {isLoggedIn && (
-                  <HStack spacing={4}>
-                    <NavLink to="/">Home</NavLink>
-                    <NavLink to="/programmes">Programmes</NavLink>
-                  </HStack>
-                )}
-
-                {isLoggedIn && <Button onClick={onLogOutClick}>Log Out</Button>}
-
+                {isLoggedIn && Links}
+                {isLoggedIn && LogOutButton}
               </Flex>
             ) : isLoggedIn && (
               <IconButton
@@ -55,15 +60,8 @@ const Header = () => {
           </HStack>
           {(!isDesktop && isOpen) && (
             <Flex justify="space-between" flex="1" pt={4}>
-              {isLoggedIn && (
-                <HStack spacing={4}>
-                  <NavLink to="/">Home</NavLink>
-                  <NavLink to="/programmes">Programmes</NavLink>
-                </HStack>
-              )}
-
-              {isLoggedIn && <Button onClick={onLogOutClick} size="sm">Log Out</Button>}
-
+              {isLoggedIn && Links}
+              {isLoggedIn && LogOutButton}
             </Flex>
           )}
         </Container>

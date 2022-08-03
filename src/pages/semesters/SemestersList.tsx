@@ -38,9 +38,18 @@ const SemestersList = (props: SemestersListProps) => {
       .catch(() => toast(toastErrorOptions("Failed to edit semester")));
   }
 
-  const removeSemester = (id: string) => () => {
+  const removeSemester = (id: string, index: number) => () => {
     remove(id)
-      .then(() => toast(toastSuccessOptions("Successfully removed semester")))
+      .then(() => {
+        toast(toastSuccessOptions("Successfully removed semester"))
+
+        if (semesters) {
+          semesters.forEach(s => {
+            if (s.index > index) s.index -= 1
+          })
+        }
+
+      })
       .catch(() => toast(toastErrorOptions("Failed to remove semester")));
   }
 
@@ -78,7 +87,7 @@ const SemestersList = (props: SemestersListProps) => {
             seasons={seasons}
             semester={semester}
             updateSemester={updateSemester(semester.id, semester.index)}
-            removeSemester={removeSemester(semester.id)}
+            removeSemester={removeSemester(semester.id, semester.index)}
             key={semester.id}
             upIndex={semester.index != 0 ? upIndex(semester.index) : undefined}
             downIndex={semester.index != semesters.length - 1 ? downIndex(semester.index) : undefined}

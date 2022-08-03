@@ -1,17 +1,21 @@
 import React from "react";
-import { Button, Stack, Text, useBreakpointValue, useDisclosure } from "@chakra-ui/react";
+import { Button, HStack, IconButton, Stack, Text, useBreakpointValue, useDisclosure } from "@chakra-ui/react";
 import Entry from "../../components/Entry";
 import DataModal from "../../components/DataModal";
+import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 interface SubCategoriesListEntryBaseProps {
   subcategory?: SubCategory,
   addSubCategory?: (name: string, minCredits?: number, notes?: string) => void,
   updateSubCategory?: (name: string, minCredits?: number, notes?: string) => void,
-  removeSubCategory?: () => void
+  removeSubCategory?: () => void,
+
+  upIndex?: () => void,
+  downIndex?: () => void
 }
 
 const SubCategoriesListEntryBase = (props: SubCategoriesListEntryBaseProps) => {
-  const { subcategory, addSubCategory, updateSubCategory, removeSubCategory } = props;
+  const { subcategory, addSubCategory, updateSubCategory, removeSubCategory, upIndex, downIndex } = props;
   const { isOpen, onOpen, onClose } = useDisclosure();
   const isDesktop = useBreakpointValue({ base: false, lg: true });
 
@@ -77,10 +81,41 @@ const SubCategoriesListEntryBase = (props: SubCategoriesListEntryBaseProps) => {
             <Stack spacing={0}>
               <Text>{subcategory.name}</Text>
               {subcategory.notes && <Text color="gray">{subcategory.notes}</Text>}
-              {(!isDesktop && subcategory.min_credits) && <Text>{subcategory.min_credits} minimum credits</Text>}
+              {(!isDesktop && subcategory.min_credits) && <Text color="gray">{subcategory.min_credits} min credits</Text>}
             </Stack>
           }
-          right={(isDesktop && subcategory.min_credits) && <Text>{subcategory.min_credits} minimum credits</Text>}
+          right={
+            <HStack>
+              {(isDesktop && subcategory.min_credits) && <Text>{subcategory.min_credits} minimum credits</Text>}
+
+              <Stack spacing={0}>
+                {upIndex && (
+                  <IconButton
+                    aria-label="up-index"
+                    size="sm"
+                    h={downIndex ? "5" : undefined}
+                    borderRadius={downIndex ? 0 : "md"}
+                    borderTopLeftRadius="md"
+                    borderTopRightRadius="md"
+                    icon={<FiChevronUp/>}
+                    onClick={upIndex}
+                  />
+                )}
+                {downIndex && (
+                  <IconButton
+                    aria-label="up-index"
+                    size="sm"
+                    h={upIndex ? "5" : undefined}
+                    borderRadius={upIndex ? 0 : "md"}
+                    borderBottomLeftRadius="md"
+                    borderBottomRightRadius="md"
+                    icon={<FiChevronDown/>}
+                    onClick={downIndex}
+                  />
+                )}
+              </Stack>
+            </HStack>
+          }
           onEdit={onOpen}
           iconSize="sm"
         />
@@ -108,18 +143,15 @@ const SubCategoriesListEntryBase = (props: SubCategoriesListEntryBaseProps) => {
 interface SubCategoriesListEntryProps {
   subcategory: SubCategory,
   updateSubCategory?: (name: string, minCredits?: number, notes?: string) => void,
-  removeSubCategory?: () => void
+  removeSubCategory?: () => void,
+
+  upIndex?: () => void,
+  downIndex?: () => void
 }
 
 export const SubCategoriesListEntry = (props: SubCategoriesListEntryProps) => {
-  const { subcategory, updateSubCategory, removeSubCategory } = props;
-
   return (
-    <SubCategoriesListEntryBase
-      subcategory={subcategory}
-      updateSubCategory={updateSubCategory}
-      removeSubCategory={removeSubCategory}
-    />
+    <SubCategoriesListEntryBase {...props}/>
   )
 }
 
@@ -128,11 +160,7 @@ interface AddSubCategoryButtonProps {
 }
 
 export const AddSubCategoryButton = (props: AddSubCategoryButtonProps) => {
-  const { addSubCategory } = props;
-
   return (
-    <SubCategoriesListEntryBase
-      addSubCategory={addSubCategory}
-    />
+    <SubCategoriesListEntryBase {...props}/>
   )
 }

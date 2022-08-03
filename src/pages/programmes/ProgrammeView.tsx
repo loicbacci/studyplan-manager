@@ -43,33 +43,32 @@ const ProgrammeView = (props: ProgrammePageProps) => {
         <Text>{programme.notes}</Text>
       )}
 
-      <CategoriesList programme={programme}/>
+      <Stack spacing={4} divider={<Divider />}>
+        <CoursesList programmeId={programme.id} />
 
-      <Divider />
+        <CategoriesList programme={programme}/>
 
-      {isDesktop ? (
-        <Stack>
-          <HStack align="start">
+        {isDesktop ? (
+          <Stack>
+            <HStack align="start">
+              <MajorsList programmeId={programme.id}/>
+              <MinorsList programmeId={programme.id}/>
+            </HStack>
+            <HStack align="start">
+              <SeasonsList programmeId={programme.id}/>
+              <SemestersList programmeId={programme.id}/>
+            </HStack>
+          </Stack>
+        ) : (
+          <Stack>
             <MajorsList programmeId={programme.id}/>
             <MinorsList programmeId={programme.id}/>
-          </HStack>
-          <HStack align="start">
             <SeasonsList programmeId={programme.id}/>
             <SemestersList programmeId={programme.id}/>
-          </HStack>
-        </Stack>
-      ) : (
-        <Stack>
-          <MajorsList programmeId={programme.id}/>
-          <MinorsList programmeId={programme.id}/>
-          <SeasonsList programmeId={programme.id}/>
-          <SemestersList programmeId={programme.id}/>
-        </Stack>
-      )}
+          </Stack>
+        )}
+      </Stack>
 
-      <Divider />
-
-      <CoursesList programmeId={programme.id} />
 
     </Stack>
   )

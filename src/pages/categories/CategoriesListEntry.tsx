@@ -23,10 +23,13 @@ interface CategoriesListEntryBaseProps {
   addCategory?: (name: string, isMajor: boolean, isMinor: boolean, minCredits?: number, notes?: string) => void,
   updateCategory?: (name: string, isMajor: boolean, isMinor: boolean, minCredits?: number, notes?: string) => void,
   removeCategory?: () => void,
+
+  upIndex?: () => void,
+  downIndex?: () => void
 }
 
 const CategoriesListEntryBase = (props: CategoriesListEntryBaseProps) => {
-  const { category, addCategory, updateCategory, removeCategory, programmeId } = props;
+  const { category, addCategory, updateCategory, removeCategory, programmeId, upIndex, downIndex } = props;
   const { isOpen: isModalOpen, onOpen: onModalOpen, onClose: onModalClose } = useDisclosure();
   const { isOpen: isSubOpen, onToggle: onSubToggle } = useDisclosure();
 
@@ -136,7 +139,37 @@ const CategoriesListEntryBase = (props: CategoriesListEntryBaseProps) => {
                   {category.notes && <Text color="gray">{category.notes}</Text>}
                 </Stack>
               }
-              right={category.min_credits && <Text>{category.min_credits} minimum credits</Text>}
+              right={
+                <HStack>
+                  {category.min_credits && <Text>{category.min_credits} minimum credits</Text>}
+                  <Stack spacing={0}>
+                    {upIndex && (
+                      <IconButton
+                        aria-label="up-index"
+                        size="sm"
+                        h={downIndex ? "5" : undefined}
+                        borderRadius={downIndex ? 0 : "md"}
+                        borderTopLeftRadius="md"
+                        borderTopRightRadius="md"
+                        icon={<FiChevronUp/>}
+                        onClick={upIndex}
+                      />
+                    )}
+                    {downIndex && (
+                      <IconButton
+                        aria-label="up-index"
+                        size="sm"
+                        h={upIndex ? "5" : undefined}
+                        borderRadius={upIndex ? 0 : "md"}
+                        borderBottomLeftRadius="md"
+                        borderBottomRightRadius="md"
+                        icon={<FiChevronDown/>}
+                        onClick={downIndex}
+                      />
+                    )}
+                  </Stack>
+                </HStack>
+            }
               onEdit={onModalOpen}
             />
           ) : (
@@ -150,13 +183,43 @@ const CategoriesListEntryBase = (props: CategoriesListEntryBaseProps) => {
 
               <Spacer/>
 
-              <IconButton
-                variant="ghost"
-                aria-label="Open menu"
-                icon={isSubOpen ? <FiChevronUp  fontSize="1.25rem"/> : <FiChevronDown fontSize="1.25rem"/>}
-                onClick={onSubToggle}
-                size="sm"
-              />
+              <HStack spacing={0}>
+                <Stack spacing={0}>
+                  {upIndex && (
+                    <IconButton
+                      aria-label="up-index"
+                      size="sm"
+                      h={downIndex ? "5" : undefined}
+                      borderRadius={downIndex ? 0 : "md"}
+                      borderTopLeftRadius="md"
+                      borderTopRightRadius="md"
+                      icon={<FiChevronUp/>}
+                      onClick={upIndex}
+                    />
+                  )}
+                  {downIndex && (
+                    <IconButton
+                      aria-label="up-index"
+                      size="sm"
+                      h={upIndex ? "5" : undefined}
+                      borderRadius={upIndex ? 0 : "md"}
+                      borderBottomLeftRadius="md"
+                      borderBottomRightRadius="md"
+                      icon={<FiChevronDown/>}
+                      onClick={downIndex}
+                    />
+                  )}
+                </Stack>
+
+                <IconButton
+                  variant="ghost"
+                  aria-label="Open menu"
+                  icon={isSubOpen ? <FiChevronUp  fontSize="1.25rem"/> : <FiChevronDown fontSize="1.25rem"/>}
+                  onClick={onSubToggle}
+                  size="sm"
+                />
+              </HStack>
+
             </Flex>
           )}
 
@@ -170,8 +233,8 @@ const CategoriesListEntryBase = (props: CategoriesListEntryBaseProps) => {
                 </Stack>
               )}
 
-              <Box pl={4}>
-                <Box w="100%" pl={4} borderLeft="1px" borderColor="gray.400">
+              <Box pl={{ base: 1, lg: 4 }}>
+                <Box w="100%" pl={{ base: 1, lg: 4 }} borderLeft="1px" borderColor="gray.400">
                   <SubCategoriesList programmeId={programmeId} categoryId={category.id}/>
                 </Box>
               </Box>
@@ -204,19 +267,15 @@ interface CategoriesListEntryProps {
   category: Category,
   updateCategory?: (name: string, isMajor: boolean, isMinor: boolean, minCredits?: number, notes?: string) => void,
   removeCategory?: () => void,
-  programmeId: string
+  programmeId: string,
+
+  upIndex?: () => void,
+  downIndex?: () => void
 }
 
 export const CategoriesListEntry = (props: CategoriesListEntryProps) => {
-  const { category, updateCategory, removeCategory, programmeId } = props;
-
   return (
-    <CategoriesListEntryBase
-      category={category}
-      updateCategory={updateCategory}
-      removeCategory={removeCategory}
-      programmeId={programmeId}
-    />
+    <CategoriesListEntryBase {...props}/>
   )
 }
 
@@ -225,11 +284,7 @@ interface AddCategoryButtonProps {
 }
 
 export const AddCategoryButton = (props: AddCategoryButtonProps) => {
-  const { addCategory } = props;
-
   return (
-    <CategoriesListEntryBase
-      addCategory={addCategory}
-    />
+    <CategoriesListEntryBase {...props}/>
   )
 }

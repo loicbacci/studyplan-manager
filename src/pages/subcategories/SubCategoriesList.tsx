@@ -6,6 +6,7 @@ import { useProgramme } from "../../lib/firestore/programmes";
 import { useCategories } from "../../lib/firestore/categories";
 import { useSubCategories } from "../../lib/firestore/subcategories";
 import { FiCornerDownRight } from "react-icons/all";
+import { sortByIndex } from "../../lib/utils";
 
 
 interface SubCategoriesListProps {
@@ -21,10 +22,15 @@ const SubCategoriesList = (props: SubCategoriesListProps) => {
 
 
   const addSubCategory = (name: string, minCredits?: number, notes?: string) => {
+    if (!subcategories) return;
+
+    const index = subcategories.length !== 0 ? Math.max(...subcategories.map(s => s.index)) + 1 : 0;
+
     const elem: Omit<SubCategory, "id"> = {
       name,
       min_credits: minCredits,
-      notes
+      notes,
+      index
     }
 
     add(elem)
@@ -32,12 +38,13 @@ const SubCategoriesList = (props: SubCategoriesListProps) => {
       .catch(() => toast(toastErrorOptions("Failed to add sub category")));
   }
 
-  const updateSubCategory = (subcategoryId: string) => (name: string, minCredits?: number, notes?: string) => {
+  const updateSubCategory = (subcategoryId: string, index: number) => (name: string, minCredits?: number, notes?: string) => {
     const elem: SubCategory = {
       id: subcategoryId,
       name,
       min_credits: minCredits,
-      notes
+      notes,
+      index
     }
 
     update(elem)
@@ -45,10 +52,43 @@ const SubCategoriesList = (props: SubCategoriesListProps) => {
       .catch(() => toast(toastErrorOptions("Failed to edit sub category")));
   }
 
-  const removeSubCategory = (subcategoryId: string) => () => {
+  const removeSubCategory = (subcategoryId: string, index: number) => () => {
     remove(subcategoryId)
-      .then(() => toast(toastSuccessOptions("Successfully removed sub category")))
+      .then(() => {
+        toast(toastSuccessOptions("Successfully removed sub category"))
+
+        if (subcategories) {
+          subcategories.forEach(s => {
+            if (s.index > index) s.index -= 1
+          })
+        }
+      })
       .catch(() => toast(toastErrorOptions("Failed to remove sub category")));
+  }
+
+  const upIndex = (subcategoryIndex: number) => () => {
+    if (!subcategories) return;
+
+    const toMoveUp = subcategories.find(subcategory => subcategory.index === subcategoryIndex);
+    const toMoveDown = subcategories.find(subcategory => subcategory.index === subcategoryIndex - 1);
+
+    if (!toMoveUp || !toMoveDown) return;
+
+    update({ ...toMoveUp, index: toMoveUp.index - 1 });
+    update({ ...toMoveDown, index: toMoveDown.index + 1 });
+  }
+
+  const downIndex = (subcategoryIndex: number) => () => {
+    if (!subcategories) return;
+
+    const toMoveDown = subcategories.find(subcategory => subcategory.index === subcategoryIndex);
+    const toMoveUp = subcategories.find(subcategory => subcategory.index === subcategoryIndex + 1);
+
+
+    if (!toMoveUp || !toMoveDown) return;
+
+    update({ ...toMoveUp, index: toMoveUp.index - 1 });
+    update({ ...toMoveDown, index: toMoveDown.index + 1 });
   }
 
   return (
@@ -58,12 +98,14 @@ const SubCategoriesList = (props: SubCategoriesListProps) => {
         <Text color="gray">No sub categories yet</Text>
       )}
       <Stack w="100%">
-        {subcategories && subcategories.map(m => (
+        {subcategories && subcategories.sort(sortByIndex).map(subcat => (
           <SubCategoriesListEntry
-            subcategory={m}
-            updateSubCategory={updateSubCategory(m.id)}
-            removeSubCategory={removeSubCategory(m.id)}
-            key={m.id}
+            subcategory={subcat}
+            updateSubCategory={updateSubCategory(subcat.id, subcat.index)}
+            removeSubCategory={removeSubCategory(subcat.id, subcat.index)}
+            key={subcat.id}
+            upIndex={subcat.index != 0 ? upIndex(subcat.index) : undefined}
+            downIndex={subcat.index != subcategories.length - 1 ? downIndex(subcat.index) : undefined}
           />
 
         ))}

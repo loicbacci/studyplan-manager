@@ -20,32 +20,41 @@ import {
   NumberInputStepper,
   Select,
   Stack,
-  Text, useBreakpointValue,
+  Text,
+  useBreakpointValue,
   useDisclosure
 } from "@chakra-ui/react";
 import Entry from "../../components/Entry";
 import { Field, Form, Formik } from "formik";
 import DeleteButton from "../../components/DeleteButton";
+import { useMajors } from "../../lib/firestore/majors";
+import { useMinors } from "../../lib/firestore/minors";
+import { useCategoriesData } from "../../lib/firestore/categories";
+import { useSeasons } from "../../lib/firestore/seasons";
+import { sortByIndex } from "../../lib/utils";
 
 
 interface CoursesListEntryBaseProps {
-  categoriesData: CategoryData[],
-  seasons: Season[],
+  programmeId: string,
   course?: Course,
   addCourse?: (
     school_course_id: string, name: string, link: string, credits: number, season_id: string, category_id: string,
-    subcategory_id?: string
+    subcategory_id?: string, major_id?: string, minor_id?: string
   ) => void,
   updateCourse?: (
     school_course_id: string, name: string, link: string, credits: number, season_id: string, category_id: string,
-    subcategory_id?: string
+    subcategory_id?: string, major_id?: string, minor_id?: string
   ) => void,
   removeCourse?: () => void
 }
 
 const CoursesListEntryBase = (props: CoursesListEntryBaseProps) => {
-  const { categoriesData, seasons, course, addCourse, updateCourse, removeCourse } = props;
+  const { programmeId, course, addCourse, updateCourse, removeCourse } = props;
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { majors } = useMajors(programmeId);
+  const { minors } = useMinors(programmeId);
+  const { categoriesData } = useCategoriesData(programmeId);
+  const { seasons } = useSeasons(programmeId);
 
   const isDesktop = useBreakpointValue({ base: false, lg: true });
 
@@ -74,19 +83,16 @@ const CoursesListEntryBase = (props: CoursesListEntryBaseProps) => {
     return (v === "" || v === categoryIdPlaceholder) ? "Please enter category" : "";
   }
 
-  const subcategoryIdPlaceholder = "Enter subcategory";
-
-  const validateSubCategoryId = (v: string) => {
-    return (v === "" || v === subcategoryIdPlaceholder) ? "Please enter subcategory" : "";
-  }
-
+  // Seasons
   const seasonIdPlaceholder = "Enter season";
 
   const validateSeasonId = (v: string) => {
     return (v === "" || v === seasonIdPlaceholder) ? "Please enter season" : "";
   }
 
+  // Subcategories
   const hasSubCategories = (categoryId: string) => {
+    if (!categoriesData) return false;
     const categoryData = categoriesData.find(cd => cd.category.id === categoryId);
     if (!categoryData) return false;
 
@@ -94,8 +100,43 @@ const CoursesListEntryBase = (props: CoursesListEntryBaseProps) => {
   }
 
   const getSubCategories = (categoryId: string) => {
+    if (!categoriesData) return [];
     const categoryData = categoriesData.find(cd => cd.category.id === categoryId) as CategoryData;
     return categoryData.subCategories as SubCategory[];
+  }
+
+  const subcategoryIdPlaceholder = "Enter subcategory";
+
+  const validateSubCategoryId = (v: string) => {
+    return (v === "" || v === subcategoryIdPlaceholder) ? "Please enter subcategory" : "";
+  }
+
+  // Minor
+  const isMinor = (categoryId: string) => {
+    if (!categoriesData) return false;
+    const categoryData = categoriesData.find(cd => cd.category.id === categoryId);
+    if (!categoryData) return false;
+    return categoryData.category.is_minor;
+  }
+
+  const minorIdPlaceholder = "Enter minor";
+
+  const validateMinorId = (v: string) => {
+    return (v === "" || v === minorIdPlaceholder) ? "Please enter minor" : "";
+  }
+
+  // Major
+  const isMajor = (categoryId: string) => {
+    if (!categoriesData) return false;
+    const categoryData = categoriesData.find(cd => cd.category.id === categoryId);
+    if (!categoryData) return false;
+    return categoryData.category.is_major;
+  }
+
+  const majorIdPlaceholder = "Enter major";
+
+  const validateMajorId = (v: string) => {
+    return (v === "" || v === majorIdPlaceholder) ? "Please enter major" : "";
   }
 
   const onSubmit = (elem: Omit<Course, "id">) => {
@@ -103,17 +144,25 @@ const CoursesListEntryBase = (props: CoursesListEntryBaseProps) => {
       elem.subcategory_id = undefined;
     }
 
+    if (!isMinor(elem.category_id)) {
+      elem.minor_id = undefined;
+    }
+
+    if (!isMinor(elem.category_id)) {
+      elem.major_id = undefined;
+    }
+
     if (isEditing) {
       // EDI
       updateCourse(
         elem.school_course_id, elem.name, elem.link, elem.credits, elem.season_id, elem.category_id,
-        elem.subcategory_id
+        elem.subcategory_id, elem.major_id, elem.minor_id
       );
     } else if (isAdding) {
       // ADD
       addCourse(
         elem.school_course_id, elem.name, elem.link, elem.credits, elem.season_id, elem.category_id,
-        elem.subcategory_id
+        elem.subcategory_id, elem.major_id, elem.minor_id
       );
     }
 
@@ -128,8 +177,6 @@ const CoursesListEntryBase = (props: CoursesListEntryBaseProps) => {
     onClose();
   }
 
-  //TODO add to major categories, the selection of the major (and same for minors)
-
   return (
     <>
       {isEditing ? (
@@ -138,10 +185,14 @@ const CoursesListEntryBase = (props: CoursesListEntryBaseProps) => {
             <HStack spacing={2}>
               {isDesktop && <Text color="gray">{course.school_course_id}</Text>}
               {isDesktop && <Text>-</Text>}
-              <Link href={course.link} isExternal color="blue.500">{course.name}</Link>
+              <Stack spacing={0}>
+                <Link href={course.link} isExternal color="blue.500">{course.name}</Link>
+                {!isDesktop && <Text color="gray">{course.credits} credits</Text>}
+              </Stack>
+
             </HStack>
           }
-          right={<Text>{course.credits} credits</Text>}
+          right={isDesktop && <Text>{course.credits} credits</Text>}
           onEdit={onOpen}
           iconSize="sm"
         />
@@ -164,7 +215,9 @@ const CoursesListEntryBase = (props: CoursesListEntryBaseProps) => {
               credits: course ? course.credits : undefined,
               season_id: course ? course.season_id : "",
               category_id: course ? course.category_id : "",
-              subcategory_id: course ? course.subcategory_id : undefined
+              subcategory_id: course ? course.subcategory_id : undefined,
+              major_id: course ? course.major_id : undefined,
+              minor_id: course ? course.minor_id : undefined,
             }}
             onSubmit={(values, actions) => {
               setTimeout(() => {
@@ -239,43 +292,47 @@ const CoursesListEntryBase = (props: CoursesListEntryBaseProps) => {
                       )}
                     </Field>
 
-                    <Field as="select" name="season_id" validate={validateSeasonId}>
-                      {({ field, form }: any) => (
-                        <FormControl
-                          isInvalid={form.errors.season_id && form.touched.season_id}
-                          isRequired
-                        >
-                          <FormLabel>Season</FormLabel>
-                          <Select {...field} placeholder={seasonIdPlaceholder}>
-                            {seasons.map(season => (
-                              <option value={season.id}>
-                                {season.name}
-                              </option>
-                            ))}
-                          </Select>
-                          <FormErrorMessage>{form.errors.season_id}</FormErrorMessage>
-                        </FormControl>
-                      )}
-                    </Field>
+                    {seasons && (
+                      <Field as="select" name="season_id" validate={validateSeasonId}>
+                        {({ field, form }: any) => (
+                          <FormControl
+                            isInvalid={form.errors.season_id && form.touched.season_id}
+                            isRequired
+                          >
+                            <FormLabel>Season</FormLabel>
+                            <Select {...field} placeholder={seasonIdPlaceholder}>
+                              {seasons.map(season => (
+                                <option value={season.id}>
+                                  {season.name}
+                                </option>
+                              ))}
+                            </Select>
+                            <FormErrorMessage>{form.errors.season_id}</FormErrorMessage>
+                          </FormControl>
+                        )}
+                      </Field>
+                    )}
 
-                    <Field as="select" name="category_id" validate={validateCategoryId}>
-                      {({ field, form }: any) => (
-                        <FormControl
-                          isInvalid={form.errors.category_id && form.touched.category_id}
-                          isRequired
-                        >
-                          <FormLabel>Category</FormLabel>
-                          <Select {...field} placeholder={categoryIdPlaceholder}>
-                            {categoriesData.map(cat => (
-                              <option value={cat.category.id}>
-                                {cat.category.name}
-                              </option>
-                            ))}
-                          </Select>
-                          <FormErrorMessage>{form.errors.category_id}</FormErrorMessage>
-                        </FormControl>
-                      )}
-                    </Field>
+                    {categoriesData && (
+                      <Field as="select" name="category_id" validate={validateCategoryId}>
+                        {({ field, form }: any) => (
+                          <FormControl
+                            isInvalid={form.errors.category_id && form.touched.category_id}
+                            isRequired
+                          >
+                            <FormLabel>Category</FormLabel>
+                            <Select {...field} placeholder={categoryIdPlaceholder}>
+                              {categoriesData.map(cd => cd.category).sort(sortByIndex).map(cat => (
+                                <option value={cat.id}>
+                                  {cat.name}
+                                </option>
+                              ))}
+                            </Select>
+                            <FormErrorMessage>{form.errors.category_id}</FormErrorMessage>
+                          </FormControl>
+                        )}
+                      </Field>
+                    )}
 
                     {hasSubCategories(props.values.category_id) && (
                       <Field as="select" name="subcategory_id" validate={validateSubCategoryId}>
@@ -286,7 +343,7 @@ const CoursesListEntryBase = (props: CoursesListEntryBaseProps) => {
                           >
                             <FormLabel>Sub Category</FormLabel>
                             <Select {...field} placeholder={subcategoryIdPlaceholder}>
-                              {getSubCategories(props.values.category_id).map(subcat => (
+                              {getSubCategories(props.values.category_id).sort(sortByIndex).map(subcat => (
                                 <option value={subcat.id}>
                                   {subcat.name}
                                 </option>
@@ -296,8 +353,49 @@ const CoursesListEntryBase = (props: CoursesListEntryBaseProps) => {
                           </FormControl>
                         )}
                       </Field>
-                    )
-                    }
+                    )}
+
+                    {(isMajor(props.values.category_id) && majors) && (
+                      <Field as="select" name="major_id" validate={validateMajorId}>
+                        {({ field, form }: any) => (
+                          <FormControl
+                            isInvalid={form.errors.major_id && form.touched.major_id}
+                            isRequired
+                          >
+                            <FormLabel>Major</FormLabel>
+                            <Select {...field} placeholder={majorIdPlaceholder}>
+                              {majors.map(major => (
+                                <option value={major.id}>
+                                  {major.name}
+                                </option>
+                              ))}
+                            </Select>
+                            <FormErrorMessage>{form.errors.major_id}</FormErrorMessage>
+                          </FormControl>
+                        )}
+                      </Field>
+                    )}
+
+                    {(isMinor(props.values.category_id) && minors) && (
+                      <Field as="select" name="minor_id" validate={validateMinorId}>
+                        {({ field, form }: any) => (
+                          <FormControl
+                            isInvalid={form.errors.minor_id && form.touched.minor_id}
+                            isRequired
+                          >
+                            <FormLabel>Minor</FormLabel>
+                            <Select {...field} placeholder={minorIdPlaceholder}>
+                              {minors.map(minor => (
+                                <option value={minor.id}>
+                                  {minor.name}
+                                </option>
+                              ))}
+                            </Select>
+                            <FormErrorMessage>{form.errors.minor_id}</FormErrorMessage>
+                          </FormControl>
+                        )}
+                      </Field>
+                    )}
                   </Stack>
                 </ModalBody>
 
@@ -334,12 +432,11 @@ const CoursesListEntryBase = (props: CoursesListEntryBaseProps) => {
 }
 
 interface CoursesListEntryProps {
-  seasons: Season[],
-  categoriesData: CategoryData[],
+  programmeId: string,
   course: Course,
   updateCourse: (
     school_course_id: string, name: string, link: string, credits: number, season_id: string, category_id: string,
-    subcategory_id?: string
+    subcategory_id?: string, major_id?: string, minor_id?: string
   ) => void,
   removeCourse: () => void
 }
@@ -351,11 +448,10 @@ export const CoursesListEntry = (props: CoursesListEntryProps) => {
 }
 
 interface AddCourseButtonProps {
-  seasons: Season[],
-  categoriesData: CategoryData[],
+  programmeId: string,
   addCourse: (
     school_course_id: string, name: string, link: string, credits: number, season_id: string, category_id: string,
-    subcategory_id?: string
+    subcategory_id?: string, major_id?: string, minor_id?: string
   ) => void,
 }
 

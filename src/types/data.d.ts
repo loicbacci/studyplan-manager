@@ -39,17 +39,19 @@ interface Category extends BaseData {
   is_minor: boolean;
   min_credits?: number;
   notes?: string;
+  index: number;
 }
 
 interface SubCategory extends BaseData {
   name: string;
   min_credits?: number;
   notes?: string;
+  index: number
 }
 
 interface CategoryData {
   category: Category,
-  subCategories?: SubCategory[]
+  subCategories?: SubCategory[],
 }
 
 
@@ -72,4 +74,7 @@ interface Course extends BaseData {
   link: string;
   name: string;
   school_course_id: string;
+
+  major_id?: string,
+  minor_id?: string
 }
