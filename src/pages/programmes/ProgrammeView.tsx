@@ -7,6 +7,7 @@ import MinorsList from "../minors/MinorsList";
 import CategoriesList from "../categories/CategoriesList";
 import SeasonsList from "../seasons/SeasonsList";
 import SemestersList from "../semesters/SemestersList";
+import CoursesList from "../courses/CoursesList";
 
 const ProgrammeViewLoader = () => {
   const { programmeId } = useParams();
@@ -65,6 +66,10 @@ const ProgrammeView = (props: ProgrammePageProps) => {
           <SemestersList programmeId={programme.id}/>
         </Stack>
       )}
+
+      <Divider />
+
+      <CoursesList programmeId={programme.id} />
 
     </Stack>
   )

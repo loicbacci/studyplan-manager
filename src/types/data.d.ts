@@ -7,6 +7,9 @@ interface BaseData {
 // Programmes --- Majors
 //            \__ Minors
 //             \_ Categories -- SubCategories
+//                Seasons
+//                Semesters
+//                Courses
 
 interface Plan extends BaseData {
   name: string
@@ -44,6 +47,11 @@ interface SubCategory extends BaseData {
   notes?: string;
 }
 
+interface CategoryData {
+  category: Category,
+  subCategories?: SubCategory[]
+}
+
 
 interface Season extends BaseData {
   name: string;
@@ -55,11 +63,10 @@ interface Semester extends BaseData {
   season_id: string;
 }
 
-
 interface Course extends BaseData {
   category_id: string;
   season_id: string;
-  subcategory_id: string;
+  subcategory_id?: string;
 
   credits: number;
   link: string;

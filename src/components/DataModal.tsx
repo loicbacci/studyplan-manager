@@ -87,7 +87,7 @@ function DataModal<T>(props: DataModalProps<T>) {
                                     ))}
                                   </Stack>
                                 </RadioGroup>
-                                <FormErrorMessage>{form.errors.parentId}</FormErrorMessage>
+                                <FormErrorMessage>{form.errors[f.name]}</FormErrorMessage>
                               </FormControl>
                             )}
                           </Field>
@@ -113,7 +113,7 @@ function DataModal<T>(props: DataModalProps<T>) {
                                     </option>
                                   ))}
                                 </Select>
-                                <FormErrorMessage>{form.errors.parentId}</FormErrorMessage>
+                                <FormErrorMessage>{form.errors[f.name]}</FormErrorMessage>
                               </FormControl>
                             )}
                           </Field>
