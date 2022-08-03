@@ -170,7 +170,7 @@ const CategoriesListEntryBase = (props: CategoriesListEntryBaseProps) => {
                   </Stack>
                 </HStack>
             }
-              onEdit={onModalOpen}
+              onClick={onModalOpen}
             />
           ) : (
             <Flex>

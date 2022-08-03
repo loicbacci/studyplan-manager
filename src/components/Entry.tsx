@@ -1,5 +1,5 @@
 import {
-  Center,
+  Center, Checkbox,
   Flex,
   HStack,
   IconButton,
@@ -20,13 +20,16 @@ interface EntryProps {
   right?: React.ReactNode;
   popoverHeader?: React.ReactNode;
   popoverBody?: React.ReactNode;
-  onEdit: () => void;
+  onClick: () => void;
   border?: boolean,
-  iconSize?: string
+  iconSize?: string,
+
+  isChecked?: boolean
+  onCheck?: (checked: boolean) => void
 }
 
 const Entry = (props: EntryProps) => {
-  const { left, right, onEdit, popoverHeader, popoverBody, border, iconSize } = props;
+  const { left, right, onClick, popoverHeader, popoverBody, border, iconSize, isChecked, onCheck } = props;
 
   return (
     <Flex borderWidth={border ? "1px" : ""} borderRadius="md" w="100%">
@@ -49,7 +52,11 @@ const Entry = (props: EntryProps) => {
       <Spacer/>
       <HStack spacing={4}>
         {right}
-        <IconButton aria-label="Edit" icon={<FiEdit/>} onClick={onEdit} size={iconSize}/>
+        {(onCheck && isChecked !== undefined) ? (
+          <Checkbox isChecked={isChecked} onChange={e => onCheck(e.target.checked)} />
+        ) : (
+          <IconButton aria-label="Edit" icon={<FiEdit/>} onClick={onClick} size={iconSize}/>
+        )}
       </HStack>
     </Flex>
   );

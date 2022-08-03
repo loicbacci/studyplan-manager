@@ -13,10 +13,11 @@ interface BaseData {
 
 interface Plan extends BaseData {
   name: string
-  programmeId: string
-  chosenMajorId: string
-  chosenMinorId: string
-  chosenCoursesIds: string
+  programme_id: string
+  chosen_major_id: string
+  chosen_minor_id: string
+  chosen_courses_ids: string[],
+  notes?: string
 }
 
 interface Programme extends BaseData {

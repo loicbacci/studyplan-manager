@@ -4,10 +4,9 @@ import LoginPage from "./pages/LoginPage";
 import ProgrammesList from "./pages/programmes/ProgrammesList";
 import IndexPage from "./pages/IndexPage";
 import RequireAuth from "./components/RequireAuth";
-import MajorsList from "./pages/majors/MajorsList";
-import MinorsList from "./pages/minors/MinorsList";
 import ProgrammeView from "./pages/programmes/ProgrammeView";
-import CategoriesList from "./pages/categories/CategoriesList";
+import PlansList from "./pages/plans/PlansList";
+import PlanView from "./pages/plans/PlanView";
 
 const App = () => {
   return (
@@ -19,6 +18,9 @@ const App = () => {
 
           <Route path="/programmes" element={<ProgrammesList/>}/>
           <Route path="/programmes/:programmeId" element={<ProgrammeView />}/>
+
+          <Route path="/plans" element={<PlansList/>}/>
+          <Route path="/plans/:planId" element={<PlanView />}/>
         </Routes>
       </RequireAuth>
     </Layout>

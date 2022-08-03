@@ -14,6 +14,9 @@ const IndexPage = () => {
           See programmes
         </Button>
 
+        <Button onClick={() => navigate("/plans")}>
+          See plans
+        </Button>
       </Stack>
     </VStack>
   )

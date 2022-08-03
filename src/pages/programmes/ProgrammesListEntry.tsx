@@ -80,7 +80,7 @@ const ProgrammesListEntryBase = (props: ProgrammesEntryBaseProps) => {
           </Stack>
 
           }
-          onEdit={onOpen}
+          onClick={onOpen}
           border
         />
 

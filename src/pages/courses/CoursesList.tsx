@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Heading, HStack, IconButton, Stack, Text, useDisclosure, useToast } from "@chakra-ui/react";
 import { toastErrorOptions, toastSuccessOptions } from "../../lib/chakraUtils";
 import { AddCourseButton } from "./CoursesListEntry";
@@ -16,16 +16,26 @@ export type UpdateCourse = (courseId: string) => (
 export type RemoveCourse = (courseId: string) => () => void
 
 interface CoursesListProps {
-  programmeId: string
+  programmeId: string,
+  coursesIdsToShow?: string[],  // Used to only show some courses
+  chosenCoursesIds?: string[],   // Used to take/untake courses
+  onCheck?: (courseId: string, checked: boolean) => void,
+  noBorder?: boolean
 }
 
 const CoursesList = (props: CoursesListProps) => {
-  const { programmeId } = props;
-  const { isOpen, onToggle } = useDisclosure();
+  const { programmeId, coursesIdsToShow, chosenCoursesIds, onCheck, noBorder } = props;
+  const { isOpen, onToggle, onOpen } = useDisclosure();
 
   const { courses, add, update, remove } = useCourses(programmeId);
   const { categoriesData } = useCategoriesData(programmeId);
   const { seasons } = useSeasons(programmeId);
+
+  useEffect(() => {
+    if (noBorder) {
+      onOpen();
+    }
+  }, [noBorder]);
 
   const toast = useToast();
 
@@ -66,11 +76,14 @@ const CoursesList = (props: CoursesListProps) => {
             courses={courses}
             updateCourse={updateCourse}
             removeCourse={removeCourse}
+            coursesIdsToShow={coursesIdsToShow}
+            chosenCoursesIds={chosenCoursesIds}
+            onCheck={onCheck}
           />
         )}
       </Stack>
 
-      {(categoriesData && seasons) && (
+      {(categoriesData && seasons && !noBorder) && (
         <AddCourseButton programmeId={programmeId} addCourse={addCourse}/>
       )}
     </>
@@ -78,25 +91,27 @@ const CoursesList = (props: CoursesListProps) => {
 
   return (
     <Stack
-      borderWidth="1px"
-      borderRadius="md"
-      py={{ base: 1, lg: 2 }}
-      pb={{ base: 1, lg: 2 }}
-      px={{ base: 2, lg: 4 }}
+      borderWidth={noBorder ? undefined : "1px"}
+      borderRadius={noBorder ? undefined : "md"}
+      py={noBorder ? undefined : { base: 1, lg: 2 }}
+      pb={noBorder ? undefined : { base: 1, lg: 2 }}
+      px={noBorder ? undefined : { base: 2, lg: 4 }}
       w="100%"
     >
-      <HStack justify="space-between">
-        <Heading size="md" mb={{ base: 0, lg: 2 }}>
-          Courses
-        </Heading>
+      {!noBorder && (
+        <HStack justify="space-between">
+          <Heading size="md" mb={{ base: 0, lg: 2 }}>
+            Courses
+          </Heading>
 
-        <IconButton
-          variant="ghost"
-          aria-label="Open menu"
-          icon={isOpen ? <FiChevronUp/> : <FiChevronDown fontSize="1.25rem"/>}
-          onClick={onToggle}
-        />
-      </HStack>
+          <IconButton
+            variant="ghost"
+            aria-label="Open menu"
+            icon={isOpen ? <FiChevronUp/> : <FiChevronDown fontSize="1.25rem"/>}
+            onClick={onToggle}
+          />
+        </HStack>
+      )}
 
       {isOpen && Body}
     </Stack>

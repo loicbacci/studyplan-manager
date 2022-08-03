@@ -28,6 +28,7 @@ const Header = () => {
     <HStack spacing={4}>
       <NavLink to="/" onClick={onClose}>Home</NavLink>
       <NavLink to="/programmes" onClick={onClose}>Programmes</NavLink>
+      <NavLink to="/plans" onClick={onClose}>Plans</NavLink>
     </HStack>
   );
 

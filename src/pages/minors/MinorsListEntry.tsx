@@ -52,7 +52,7 @@ const MinorsListEntryBase = (props: MinorsListEntryBaseProps) => {
       {isEditing ? (
         <Entry
           left={<Text>{minor.name}</Text>}
-          onEdit={onOpen}
+          onClick={onOpen}
         />
       ) : (
         <Button onClick={onOpen} w="fit-content" size="sm">

@@ -45,11 +45,14 @@ interface CoursesListEntryBaseProps {
     school_course_id: string, name: string, link: string, credits: number, season_id: string, category_id: string,
     subcategory_id?: string, major_id?: string, minor_id?: string
   ) => void,
-  removeCourse?: () => void
+  removeCourse?: () => void,
+
+  isChecked?: boolean
+  onCheck?: (checked: boolean) => void
 }
 
 const CoursesListEntryBase = (props: CoursesListEntryBaseProps) => {
-  const { programmeId, course, addCourse, updateCourse, removeCourse } = props;
+  const { programmeId, course, addCourse, updateCourse, removeCourse, isChecked, onCheck } = props;
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { majors } = useMajors(programmeId);
   const { minors } = useMinors(programmeId);
@@ -193,7 +196,9 @@ const CoursesListEntryBase = (props: CoursesListEntryBaseProps) => {
             </HStack>
           }
           right={isDesktop && <Text>{course.credits} credits</Text>}
-          onEdit={onOpen}
+          onClick={onOpen}
+          isChecked={isChecked}
+          onCheck={onCheck}
           iconSize="sm"
         />
       ) : (
@@ -438,7 +443,10 @@ interface CoursesListEntryProps {
     school_course_id: string, name: string, link: string, credits: number, season_id: string, category_id: string,
     subcategory_id?: string, major_id?: string, minor_id?: string
   ) => void,
-  removeCourse: () => void
+  removeCourse: () => void,
+
+  isChecked?: boolean
+  onCheck?: (checked: boolean) => void
 }
 
 export const CoursesListEntry = (props: CoursesListEntryProps) => {

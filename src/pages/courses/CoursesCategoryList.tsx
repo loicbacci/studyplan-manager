@@ -12,11 +12,15 @@ interface CoursesCategoryListProps {
   programmeId: string,
   courses: Course[],
   updateCourse: UpdateCourse,
-  removeCourse: RemoveCourse
+  removeCourse: RemoveCourse,
+
+  coursesIdsToShow?: string[],  // Used to only show some courses
+  chosenCoursesIds?: string[],   // Used to take/untake courses
+  onCheck?: (courseId: string, checked: boolean) => void
 }
 
 const CoursesCategoryList = (props: CoursesCategoryListProps) => {
-  const { programmeId, courses, updateCourse, removeCourse } = props;
+  const { programmeId, courses, updateCourse, removeCourse, coursesIdsToShow, chosenCoursesIds, onCheck } = props;
 
   const { categoriesData } = useCategoriesData(programmeId);
   const categories = categoriesData ? categoriesData.map(cd => cd.category) : [];
@@ -68,6 +72,9 @@ const CoursesCategoryList = (props: CoursesCategoryListProps) => {
             minor={minor}
             updateCourse={updateCourse}
             removeCourse={removeCourse}
+            coursesIdsToShow={coursesIdsToShow}
+            chosenCoursesIds={chosenCoursesIds}
+            onCheck={onCheck}
           />
         ))}
     </>
@@ -81,11 +88,15 @@ interface CategoryEntryProps {
   minor?: Minor,
   courses: Course[],
   updateCourse: UpdateCourse,
-  removeCourse: RemoveCourse
+  removeCourse: RemoveCourse,
+
+  coursesIdsToShow?: string[],  // Used to only show some courses
+  chosenCoursesIds?: string[],   // Used to take/untake courses
+  onCheck?: (courseId: string, checked: boolean) => void
 }
 
 const CategoryEntry = (props: CategoryEntryProps) => {
-  const { category, programmeId, major, minor, courses, updateCourse, removeCourse } = props;
+  const { category, programmeId, major, minor, courses, updateCourse, removeCourse, coursesIdsToShow, chosenCoursesIds, onCheck } = props;
 
   const { isOpen, onToggle, onOpen } = useDisclosure();
 
@@ -130,6 +141,9 @@ const CategoryEntry = (props: CategoryEntryProps) => {
                 categoryId={category.id}
                 updateCourse={updateCourse}
                 removeCourse={removeCourse}
+                coursesIdsToShow={coursesIdsToShow}
+                chosenCoursesIds={chosenCoursesIds}
+                onCheck={onCheck}
               />
             ) : (
               // Grouped by season
@@ -138,6 +152,9 @@ const CategoryEntry = (props: CategoryEntryProps) => {
                 programmeId={programmeId}
                 updateCourse={updateCourse}
                 removeCourse={removeCourse}
+                coursesIdsToShow={coursesIdsToShow}
+                chosenCoursesIds={chosenCoursesIds}
+                onCheck={onCheck}
               />
             )}
           </Stack>

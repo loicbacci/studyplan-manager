@@ -10,11 +10,15 @@ interface CoursesSubCategoryListProps {
   programmeId: string,
   categoryId: string,
   updateCourse: UpdateCourse,
-  removeCourse: RemoveCourse
+  removeCourse: RemoveCourse,
+
+  coursesIdsToShow?: string[],  // Used to only show some courses
+  chosenCoursesIds?: string[],   // Used to take/untake courses
+  onCheck?: (courseId: string, checked: boolean) => void
 }
 
 const CoursesSubCategoryList = (props: CoursesSubCategoryListProps) => {
-  const { programmeId, categoryId, courses, updateCourse, removeCourse } = props;
+  const { programmeId, categoryId, courses, updateCourse, removeCourse, coursesIdsToShow, chosenCoursesIds, onCheck } = props;
 
   const { categoriesData } = useCategoriesData(programmeId);
 
@@ -56,6 +60,9 @@ const CoursesSubCategoryList = (props: CoursesSubCategoryListProps) => {
           programmeId={programmeId}
           updateCourse={updateCourse}
           removeCourse={removeCourse}
+          coursesIdsToShow={coursesIdsToShow}
+          chosenCoursesIds={chosenCoursesIds}
+          onCheck={onCheck}
         />
       ))}
     </>
@@ -67,11 +74,15 @@ interface SubCategoryEntryProps {
   courses: Course[],
   programmeId: string,
   updateCourse: UpdateCourse,
-  removeCourse: RemoveCourse
+  removeCourse: RemoveCourse,
+
+  coursesIdsToShow?: string[],  // Used to only show some courses
+  chosenCoursesIds?: string[],   // Used to take/untake courses
+  onCheck?: (courseId: string, checked: boolean) => void
 }
 
 const SubCategoryEntry = (props: SubCategoryEntryProps) => {
-  const { subCategory, courses, programmeId, updateCourse, removeCourse } = props;
+  const { subCategory, courses, programmeId, updateCourse, removeCourse, coursesIdsToShow, chosenCoursesIds, onCheck } = props;
 
   const { isOpen, onToggle, onOpen } = useDisclosure();
 
@@ -96,6 +107,9 @@ const SubCategoryEntry = (props: SubCategoryEntryProps) => {
             programmeId={programmeId}
             updateCourse={updateCourse}
             removeCourse={removeCourse}
+            coursesIdsToShow={coursesIdsToShow}
+            chosenCoursesIds={chosenCoursesIds}
+            onCheck={onCheck}
           />
         </Stack>
       </Box>}

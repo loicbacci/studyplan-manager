@@ -51,7 +51,7 @@ const SeasonsListEntryBase = (props: SeasonsListEntryBaseProps) => {
       {isEditing ? (
         <Entry
           left={<Text>{season.name}</Text>}
-          onEdit={onOpen}
+          onClick={onOpen}
         />
       ) : (
         <Button onClick={onOpen} w="fit-content" size="sm">

@@ -116,7 +116,7 @@ const SubCategoriesListEntryBase = (props: SubCategoriesListEntryBaseProps) => {
               </Stack>
             </HStack>
           }
-          onEdit={onOpen}
+          onClick={onOpen}
           iconSize="sm"
         />
       ) : (

@@ -101,7 +101,7 @@ const SemestersListEntryBase = (props: SemestersListEntryBaseProps) => {
               )}
             </Stack>
           }
-          onEdit={onOpen}
+          onClick={onOpen}
         />
       ) : (
         <Button onClick={onOpen} w="fit-content" size="sm">
