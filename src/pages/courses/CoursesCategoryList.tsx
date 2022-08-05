@@ -32,8 +32,8 @@ const CoursesCategoryList = (props: CoursesCategoryListProps) => {
   const { majors: baseMajors } = useMajors(programmeId);
   const { minors: baseMinors } = useMinors(programmeId);
 
-  const majors = baseMajors ? baseMajors.filter(m => m.id === showMajorId) : null;
-  const minors = baseMinors ? baseMinors.filter(m => m.id === showMinorId) : null;
+  const majors = (baseMajors && showMajorId) ? baseMajors.filter(m => m.id === showMajorId) : baseMajors;
+  const minors = (baseMinors && showMinorId) ? baseMinors.filter(m => m.id === showMinorId) : baseMinors;
 
   const groupByCategory = (cs: Course[]) => {
     const res = [] as [{ category: Category, major?: Major, minor?: Minor }, Course[]][];
@@ -62,6 +62,8 @@ const CoursesCategoryList = (props: CoursesCategoryListProps) => {
         res.push([key, [course]]);
       }
     })
+
+    console.log(res)
 
     return res.sort(([a], [b]) => sortByIndex(a.category, b.category));
   }
@@ -126,7 +128,6 @@ const CategoryEntry = (props: CategoryEntryProps) => {
 
   const subCategories = getSubCategories(category.id);
   const hasSubcategories = subCategories !== null;
-
 
   let title = category.name;
 
