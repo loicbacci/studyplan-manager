@@ -84,6 +84,9 @@ const CoursesCategoryList = (props: CoursesCategoryListProps) => {
     <>
       {groupByCategory(courses)
         .map(([{ category, major, minor }, cs]) => {
+          const filteredCourses = coursesIdsToShow ? cs.filter(c => coursesIdsToShow.some(cid => c.id === cid)) : cs;
+
+          if (filteredCourses.length === 0) return <div />;
           if (category.is_minor && !minor) return <div />;
           if (category.is_major && !major) return <div />;
 

@@ -5,10 +5,10 @@ import {
   AccordionButton,
   AccordionIcon,
   AccordionItem,
-  AccordionPanel,
+  AccordionPanel, Button,
   Divider,
   Heading,
-  HStack, SimpleGrid,
+  HStack, Menu, MenuButton, MenuItem, MenuList, SimpleGrid,
   Stack,
   Text,
   useDisclosure, Wrap
@@ -23,6 +23,7 @@ import { useSemesters } from "../../lib/firestore/semesters";
 import DataModal from "../../components/DataModal";
 import { sortByIndex } from "../../lib/utils";
 import { useSeasons } from "../../lib/firestore/seasons";
+import { FiChevronDown } from "react-icons/fi";
 
 const PlanViewLoader = () => {
   const { planId } = useParams();
@@ -78,6 +79,7 @@ const PlanView = (props: PlanViewProps) => {
 
   const [editingCourseId, setEditingCourseId] = useState(null as string | null);
   const [editing, setEditing] = useState(false);
+  const [selectedSemesterId, setSelectedSemesterId] = useState("");
 
   const { seasons } = useSeasons(programme.id);
   const { majors } = useMajors(programme.id);
@@ -91,6 +93,12 @@ const PlanView = (props: PlanViewProps) => {
 
   const takenCourses = (courses && takenCoursesData)
     ? courses.filter(c => takenCoursesData.some(data => data.course_id === c.id))
+    : [];
+
+  const filteredCoursesIds = takenCoursesData
+    ? takenCoursesData
+      .filter(d => selectedSemesterId === "" ? true : d.semester_id === selectedSemesterId)
+      .map(d => d.course_id)
     : [];
 
   const creditsInSemester = (semesterId: string) => {
@@ -183,10 +191,12 @@ const PlanView = (props: PlanViewProps) => {
         <Heading mb={2}>{plan.name}</Heading>
 
         {plan.notes && (
-          <Text>{plan.notes}</Text>
+          <>
+            <Text>{plan.notes}</Text>
+            <Divider/>
+          </>
         )}
 
-        <Divider/>
 
         <Stack spacing={6}>
           <Stack>
@@ -236,16 +246,36 @@ const PlanView = (props: PlanViewProps) => {
                 </AccordionButton>
 
                 <AccordionPanel>
-                  <CoursesList
-                    programmeId={programme.id}
-                    takenCoursesData={takenCoursesData ? takenCoursesData : undefined}
-                    coursesIdsToShow={takenCourses.map(c => c.id)}
-                    noBorder
-                    onEdit={onEdit}
+                  <Stack spacing={4}>
+                    {semesters && (
+                      <Menu>
+                        <MenuButton as={Button} rightIcon={<FiChevronDown/>} w="fit-content">
+                          Semester
+                        </MenuButton>
 
-                    showMinorId={plan.chosen_minor_id}
-                    showMajorId={plan.chosen_major_id}
-                  />
+                        <MenuList>
+                          <MenuItem onClick={() => setSelectedSemesterId("")}>All</MenuItem>
+                          {semesters.map(sem => (
+                            <MenuItem onClick={() => setSelectedSemesterId(sem.id)}>
+                              {sem.name}
+                            </MenuItem>
+                          ))}
+                        </MenuList>
+                      </Menu>
+                    )}
+
+                    <CoursesList
+                      programmeId={programme.id}
+                      takenCoursesData={takenCoursesData ? takenCoursesData : undefined}
+                      coursesIdsToShow={filteredCoursesIds}
+                      noBorder
+                      onEdit={onEdit}
+
+                      showMinorId={plan.chosen_minor_id}
+                      showMajorId={plan.chosen_major_id}
+                    />
+                  </Stack>
+
                 </AccordionPanel>
               </AccordionItem>
 

@@ -20,7 +20,9 @@ interface CoursesSubCategoryListProps {
 }
 
 const CoursesSubCategoryList = (props: CoursesSubCategoryListProps) => {
-  const { programmeId, categoryId, onEdit, courses, updateCourse, removeCourse, coursesIdsToShow, takenCoursesData, onCheck } = props;
+  const {
+    programmeId, categoryId, onEdit, courses, updateCourse, removeCourse, coursesIdsToShow, takenCoursesData, onCheck
+  } = props;
 
   const { categoriesData } = useCategoriesData(programmeId);
 
@@ -53,21 +55,29 @@ const CoursesSubCategoryList = (props: CoursesSubCategoryListProps) => {
     return [...res.entries()].sort(([a], [b]) => sortByIndex(a, b));
   }
 
+
   return (
     <>
-      {groupBySubCategory(courses, categoryId).map(([subCategory, cs]) => (
-        <SubCategoryEntry
-          subCategory={subCategory}
-          courses={cs}
-          programmeId={programmeId}
-          updateCourse={updateCourse}
-          removeCourse={removeCourse}
-          coursesIdsToShow={coursesIdsToShow}
-          takenCoursesData={takenCoursesData}
-          onCheck={onCheck}
-          onEdit={onEdit}
-        />
-      ))}
+      {groupBySubCategory(courses, categoryId).map(([subCategory, cs]) => {
+        const filteredCourses = coursesIdsToShow ? cs.filter(c => coursesIdsToShow.some(cid => c.id === cid)) : cs;
+
+        if (filteredCourses.length === 0) return <div/>;
+
+        return (
+          <SubCategoryEntry
+            subCategory={subCategory}
+            courses={cs}
+            programmeId={programmeId}
+            updateCourse={updateCourse}
+            removeCourse={removeCourse}
+            coursesIdsToShow={coursesIdsToShow}
+            takenCoursesData={takenCoursesData}
+            onCheck={onCheck}
+            onEdit={onEdit}
+          />
+        )
+
+      })}
     </>
   )
 }
@@ -86,7 +96,9 @@ interface SubCategoryEntryProps {
 }
 
 const SubCategoryEntry = (props: SubCategoryEntryProps) => {
-  const { subCategory, courses, onEdit, programmeId, updateCourse, removeCourse, coursesIdsToShow, takenCoursesData, onCheck } = props;
+  const {
+    subCategory, courses, onEdit, programmeId, updateCourse, removeCourse, coursesIdsToShow, takenCoursesData, onCheck
+  } = props;
 
   const { isOpen, onToggle, onOpen } = useDisclosure();
 
@@ -99,8 +111,11 @@ const SubCategoryEntry = (props: SubCategoryEntryProps) => {
 
   const bgColor = () => {
     if (takenCoursesData && subCategory.min_credits) {
-      if (takenCredits < subCategory.min_credits) return "red.200";
-      else return "green.200";
+      if (takenCredits < subCategory.min_credits) {
+        return "red.200";
+      } else {
+        return "green.200";
+      }
     } else {
       return undefined;
     }
@@ -119,7 +134,6 @@ const SubCategoryEntry = (props: SubCategoryEntryProps) => {
           </Text>
         )}
       </HStack>
-
 
 
       {isOpen && <Box pl={{ base: 0.5, lg: 2 }}>
