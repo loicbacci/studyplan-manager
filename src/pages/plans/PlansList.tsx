@@ -11,14 +11,14 @@ const PlansList = () => {
 
   const addPlan = (
     name: string, programme_id: string, chosen_major_id: string, chosen_minor_id: string, notes?: string) => {
-    add({ name, programme_id, chosen_major_id, chosen_minor_id, notes, chosen_courses_ids: [] })
+    add({ name, programme_id, chosen_major_id, chosen_minor_id, notes })
       .then(() => toast(toastSuccessOptions("Successfully added plan")))
       .catch(() => toast(toastErrorOptions("Failed to add plan")));
   }
 
-  const updatePlan = (planId: string, chosen_courses_ids: string[]) => (
+  const updatePlan = (planId: string) => (
     name: string, programme_id: string, chosen_major_id: string, chosen_minor_id: string, notes?: string) => {
-    update({ id: planId, name, programme_id, chosen_major_id, chosen_minor_id, chosen_courses_ids, notes })
+    update({ id: planId, name, programme_id, chosen_major_id, chosen_minor_id, notes })
       .then(() => toast(toastSuccessOptions("Successfully edited plan")))
       .catch(() => toast(toastErrorOptions("Failed to edit plan")));
   }
@@ -38,7 +38,7 @@ const PlansList = () => {
         {plans && plans.map(p => (
           <PlansListEntry
             plan={p}
-            updatePlan={updatePlan(p.id, p.chosen_courses_ids)}
+            updatePlan={updatePlan(p.id)}
             removePlan={removePlan(p.id)}
             key={p.id}
           />
