@@ -8,10 +8,10 @@ import {
   AccordionPanel,
   Divider,
   Heading,
-  HStack,
+  HStack, SimpleGrid,
   Stack,
   Text,
-  useDisclosure
+  useDisclosure, Wrap
 } from "@chakra-ui/react";
 import { usePlan, useTakenCourses } from "../../lib/firestore/plans";
 import { useProgramme } from "../../lib/firestore/programmes";
@@ -21,6 +21,8 @@ import { useCourses } from "../../lib/firestore/courses";
 import CoursesList from "../courses/CoursesList";
 import { useSemesters } from "../../lib/firestore/semesters";
 import DataModal from "../../components/DataModal";
+import { sortByIndex } from "../../lib/utils";
+import { useSeasons } from "../../lib/firestore/seasons";
 
 const PlanViewLoader = () => {
   const { planId } = useParams();
@@ -77,10 +79,12 @@ const PlanView = (props: PlanViewProps) => {
   const [editingCourseId, setEditingCourseId] = useState(null as string | null);
   const [editing, setEditing] = useState(false);
 
+  const { seasons } = useSeasons(programme.id);
   const { majors } = useMajors(programme.id);
   const { minors } = useMinors(programme.id);
   const { courses } = useCourses(programme.id);
-  const { semesters } = useSemesters(programme.id);
+  const { semesters: baseSemesters } = useSemesters(programme.id);
+  const semesters = baseSemesters ? baseSemesters.sort(sortByIndex) : undefined;
 
   const major = majors ? majors.find(m => m.id === plan.chosen_major_id) : undefined;
   const minor = minors ? minors.find(m => m.id === plan.chosen_minor_id) : undefined;
@@ -118,6 +122,20 @@ const PlanView = (props: PlanViewProps) => {
     return data.semester_id;
   }
 
+  const getEditingCourse = () => {
+    if (!editingCourseId || !courses) return undefined;
+    return courses.find(c => c.id === editingCourseId);
+  }
+
+  const getPossibleSemesters = () => {
+    if (!semesters) return [];
+
+    const course = getEditingCourse();
+    if (!course) return [];
+
+    return semesters.filter(sem => sem.season_id === course.season_id)
+  }
+
   const semesterIdPlaceholder = "Enter Semester"
 
   const semesterIdField: TextSelectField = {
@@ -128,8 +146,8 @@ const PlanView = (props: PlanViewProps) => {
     validate: (v: string) => (v === "" || v === semesterIdPlaceholder) ? "Please enter semester" : "",
     isRequired: true,
 
-    possibleValues: semesters ? semesters.map(s => s.id) : [],
-    possibleValuesLabels: semesters ? semesters.map(s => s.name) : []
+    possibleValues: getPossibleSemesters().map(s => s.id),
+    possibleValuesLabels: getPossibleSemesters().map(s => s.name)
   }
 
   const onEdit = (courseId: string) => {
@@ -194,19 +212,23 @@ const PlanView = (props: PlanViewProps) => {
 
           <Stack>
             <Heading size="md">Credits per semester</Heading>
-            {semesters && semesters.map(semester => (
-              <HStack key={semester.id}>
-                <Text fontWeight="semibold">{semester.name}:</Text>
-                <Text>{creditsInSemester(semester.id)} credits</Text>
-              </HStack>
-            ))}
+            <SimpleGrid columns={seasons ? seasons.length : 2}>
+              {seasons && seasons.map(s => <Heading size="sm" pb={2}>{s.name}</Heading>)}
+              {semesters && semesters.map(semester => (
+                <HStack key={semester.id}>
+                  <Text fontWeight="semibold">{semester.name}:</Text>
+                  <Text>{creditsInSemester(semester.id)} credits</Text>
+                </HStack>
+              ))}
+            </SimpleGrid>
+
           </Stack>
 
           <Stack>
             <Heading size="md">Taken courses</Heading>
             {takenCourses.length === 0 && <Text color="gray">No courses taken yet.</Text>}
 
-            <Accordion allowMultiple allowToggle>
+            <Accordion allowToggle>
               <AccordionItem>
                 <AccordionButton>
                   <Text>Show taken courses</Text>

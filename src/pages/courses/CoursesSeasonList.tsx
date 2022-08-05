@@ -80,7 +80,7 @@ const CoursesSeasonList = (props: CoursesSeasonListProps) => {
                   onCheck={onCheck ? ((v) => onCheck(course.id, v)) : undefined}
                   takenSemesterId={getSemesterId(course.id)}
                   key={course.id}
-                  onEdit={() => onEdit && onEdit(course.id)}
+                  onEdit={onEdit ? (() => onEdit(course.id)) : undefined}
                 />
               ))}
             </Stack>

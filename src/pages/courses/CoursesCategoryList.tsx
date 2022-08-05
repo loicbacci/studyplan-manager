@@ -24,7 +24,10 @@ interface CoursesCategoryListProps {
 }
 
 const CoursesCategoryList = (props: CoursesCategoryListProps) => {
-  const { programmeId, showMajorId, showMinorId, onEdit, courses, updateCourse, removeCourse, coursesIdsToShow, takenCoursesData, onCheck } = props;
+  const {
+    programmeId, showMajorId, showMinorId, onEdit, courses, updateCourse, removeCourse, coursesIdsToShow,
+    takenCoursesData, onCheck
+  } = props;
 
   const { categoriesData } = useCategoriesData(programmeId);
   const categories = categoriesData ? categoriesData.map(cd => cd.category) : [];
@@ -52,6 +55,9 @@ const CoursesCategoryList = (props: CoursesCategoryListProps) => {
         ? minors.find(m => m.id === course.minor_id)
         : undefined;
 
+      if (major && showMajorId && major.id !== showMajorId) return;
+      if (minor && showMinorId && minor.id !== showMinorId) return;
+
       const key = { category, major, minor }
 
       const entry = res.find(([data, _]) => objEqual(data, key))
@@ -65,27 +71,39 @@ const CoursesCategoryList = (props: CoursesCategoryListProps) => {
 
     console.log(res)
 
-    return res.sort(([a], [b]) => sortByIndex(a.category, b.category));
+    return res.sort(([a], [b]) => {
+      if (a.category.index == b.category.index) {
+        if (a.minor && b.minor) return a.minor.name.localeCompare(b.minor.name);
+        if (a.major && b.major) return a.major.name.localeCompare(b.major.name);
+      }
+      return a.category.index - b.category.index;
+    });
   }
 
   return (
     <>
       {groupByCategory(courses)
-        .map(([{ category, major, minor }, cs]) => (
-          <CategoryEntry
-            category={category}
-            programmeId={programmeId}
-            courses={cs}
-            major={major}
-            minor={minor}
-            updateCourse={updateCourse}
-            removeCourse={removeCourse}
-            coursesIdsToShow={coursesIdsToShow}
-            takenCoursesData={takenCoursesData}
-            onCheck={onCheck}
-            onEdit={onEdit}
-          />
-        ))}
+        .map(([{ category, major, minor }, cs]) => {
+          if (category.is_minor && !minor) return <div />;
+          if (category.is_major && !major) return <div />;
+
+          return (
+            <CategoryEntry
+              category={category}
+              programmeId={programmeId}
+              courses={cs}
+              major={major}
+              minor={minor}
+              updateCourse={updateCourse}
+              removeCourse={removeCourse}
+              coursesIdsToShow={coursesIdsToShow}
+              takenCoursesData={takenCoursesData}
+              onCheck={onCheck}
+              onEdit={onEdit}
+            />
+          )
+
+        })}
     </>
   )
 }
@@ -106,7 +124,10 @@ interface CategoryEntryProps {
 }
 
 const CategoryEntry = (props: CategoryEntryProps) => {
-  const { category, onEdit, programmeId, major, minor, courses, updateCourse, removeCourse, coursesIdsToShow, takenCoursesData, onCheck } = props;
+  const {
+    category, onEdit, programmeId, major, minor, courses, updateCourse, removeCourse, coursesIdsToShow,
+    takenCoursesData, onCheck
+  } = props;
 
   const { isOpen, onToggle, onOpen } = useDisclosure();
 
@@ -140,8 +161,11 @@ const CategoryEntry = (props: CategoryEntryProps) => {
 
   const bgColor = () => {
     if (takenCoursesData && category.min_credits) {
-      if (takenCredits < category.min_credits) return "red.200";
-      else return "green.200";
+      if (takenCredits < category.min_credits) {
+        return "red.200";
+      } else {
+        return "green.200";
+      }
     } else {
       return undefined;
     }

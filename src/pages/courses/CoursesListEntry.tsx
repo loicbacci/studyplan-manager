@@ -214,7 +214,7 @@ const CoursesListEntryBase = (props: CoursesListEntryBaseProps) => {
               <Text>{course.credits} credits</Text>
             </HStack>
           )}
-          onClick={onEdit ? onEdit : onOpen}
+          onClick={onEdit !== undefined ? onEdit : onOpen}
           isChecked={isChecked}
           onCheck={onCheck}
           iconSize="sm"
