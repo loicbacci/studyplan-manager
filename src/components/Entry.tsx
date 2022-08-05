@@ -52,7 +52,7 @@ const Entry = (props: EntryProps) => {
       <Spacer/>
       <HStack spacing={4}>
         {right}
-        {(onCheck && isChecked !== undefined) ? (
+        {(onCheck !== undefined && isChecked !== undefined) ? (
           <Checkbox isChecked={isChecked} onChange={e => onCheck(e.target.checked)} />
         ) : (
           <IconButton aria-label="Edit" icon={<FiEdit/>} onClick={onClick} size={iconSize}/>

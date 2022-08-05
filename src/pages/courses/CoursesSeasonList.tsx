@@ -12,13 +12,14 @@ interface CoursesSeasonListProps {
   removeCourse: RemoveCourse,
 
   coursesIdsToShow?: string[],  // Used to only show some courses
-  chosenCoursesIds?: string[],   // Used to take/untake courses
-  onCheck?: (courseId: string, checked: boolean) => void
+  takenCoursesData?: TakenCourseData[],   // Used to take/untake courses
+  onCheck?: (courseId: string, checked: boolean) => void,
+  onEdit?: (courseId: string) => void
 }
 
 const CoursesSeasonList = (props: CoursesSeasonListProps) => {
   const {
-    courses: coursesData, programmeId, updateCourse, removeCourse, coursesIdsToShow, chosenCoursesIds, onCheck
+    courses: coursesData, programmeId, updateCourse, onEdit, removeCourse, coursesIdsToShow, takenCoursesData, onCheck
   } = props;
 
   const courses = coursesIdsToShow ? coursesData.filter(c => coursesIdsToShow.some(cid => cid === c.id)) : coursesData;
@@ -48,6 +49,14 @@ const CoursesSeasonList = (props: CoursesSeasonListProps) => {
     return [...res.entries()].sort(entrySort);
   }
 
+  const getSemesterId = (courseId: string) => {
+    if (!takenCoursesData) return undefined;
+    const courseData = takenCoursesData.find(d => d.course_id === courseId);
+
+    if (!courseData) return undefined;
+    return courseData.semester_id;
+  }
+
   return (
     <>
       {groupBySeason(courses).map(([season, coursesBySeason]) => (
@@ -67,9 +76,11 @@ const CoursesSeasonList = (props: CoursesSeasonListProps) => {
                   course={course}
                   updateCourse={updateCourse(course.id)}
                   removeCourse={removeCourse(course.id)}
-                  isChecked={chosenCoursesIds ? chosenCoursesIds.some(cid => cid === course.id) : undefined}
-                  onCheck={(v) => onCheck && onCheck(course.id, v)}
+                  isChecked={takenCoursesData ? takenCoursesData.some(d => d.course_id === course.id) : undefined}
+                  onCheck={onCheck ? ((v) => onCheck(course.id, v)) : undefined}
+                  takenSemesterId={getSemesterId(course.id)}
                   key={course.id}
+                  onEdit={() => onEdit && onEdit(course.id)}
                 />
               ))}
             </Stack>

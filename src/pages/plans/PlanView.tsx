@@ -1,24 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import {
-  Accordion, AccordionButton, AccordionIcon,
-  AccordionItem, AccordionPanel,
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
   Divider,
   Heading,
   HStack,
   Stack,
-  Table,
-  Tbody,
-  Td,
   Text,
-  Tr
+  useDisclosure
 } from "@chakra-ui/react";
-import { usePlan } from "../../lib/firestore/plans";
+import { usePlan, useTakenCourses } from "../../lib/firestore/plans";
 import { useProgramme } from "../../lib/firestore/programmes";
 import { useMajors } from "../../lib/firestore/majors";
 import { useMinors } from "../../lib/firestore/minors";
 import { useCourses } from "../../lib/firestore/courses";
 import CoursesList from "../courses/CoursesList";
+import { useSemesters } from "../../lib/firestore/semesters";
+import DataModal from "../../components/DataModal";
 
 const PlanViewLoader = () => {
   const { planId } = useParams();
@@ -35,7 +37,7 @@ interface PlanViewPlanLoaderProps {
 }
 
 const PlanViewPlanLoader = ({ planId }: PlanViewPlanLoaderProps) => {
-  const { plan, takeCourse } = usePlan(planId);
+  const { plan } = usePlan(planId);
 
   if (!plan) {
     return (
@@ -43,15 +45,14 @@ const PlanViewPlanLoader = ({ planId }: PlanViewPlanLoaderProps) => {
     )
   }
 
-  return <PlanViewProgrammeLoader plan={plan} takeCourse={takeCourse}/>
+  return <PlanViewProgrammeLoader plan={plan}/>
 }
 
 interface PlanViewProgrammeLoaderProps {
-  plan: Plan,
-  takeCourse: (courseId: string, take: boolean) => Promise<void>
+  plan: Plan
 }
 
-const PlanViewProgrammeLoader = ({ plan, takeCourse }: PlanViewProgrammeLoaderProps) => {
+const PlanViewProgrammeLoader = ({ plan }: PlanViewProgrammeLoaderProps) => {
   const { programme } = useProgramme(plan.programme_id);
 
   if (!programme) {
@@ -60,100 +61,208 @@ const PlanViewProgrammeLoader = ({ plan, takeCourse }: PlanViewProgrammeLoaderPr
     )
   }
 
-  return <PlanView plan={plan} takeCourse={takeCourse} programme={programme}/>
+  return <PlanView plan={plan} programme={programme}/>
 }
 
 interface PlanViewProps {
   plan: Plan,
-  takeCourse: (courseId: string, take: boolean) => Promise<void>
   programme: Programme
 }
 
 const PlanView = (props: PlanViewProps) => {
-  const { plan, programme, takeCourse } = props;
+  const { plan, programme } = props;
+  const { takenCoursesData, add, update, remove } = useTakenCourses(plan.id);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const [editingCourseId, setEditingCourseId] = useState(null as string | null);
+  const [editing, setEditing] = useState(false);
 
   const { majors } = useMajors(programme.id);
   const { minors } = useMinors(programme.id);
   const { courses } = useCourses(programme.id);
+  const { semesters } = useSemesters(programme.id);
 
   const major = majors ? majors.find(m => m.id === plan.chosen_major_id) : undefined;
   const minor = minors ? minors.find(m => m.id === plan.chosen_minor_id) : undefined;
 
-  const chosenCourses = courses ? courses.filter(c => plan.chosen_courses_ids.some(cid => cid === c.id)) : []
+  const takenCourses = (courses && takenCoursesData)
+    ? courses.filter(c => takenCoursesData.some(data => data.course_id === c.id))
+    : [];
 
+  const creditsInSemester = (semesterId: string) => {
+    if (!takenCoursesData || !courses) return 0;
+    const courseIdsInSemester = takenCoursesData.filter(c => c.semester_id === semesterId).map(d => d.course_id);
+    // @ts-ignore
+    return courses.filter(c => courseIdsInSemester.some(id => c.id === id)).map(c => Number.parseInt(c.credits))
+      .reduce((a, b) => a + b, 0)
+  }
+
+  const onCheck = (courseId: string, checked: boolean) => {
+    if (!checked) {
+      if (!takenCoursesData) return;
+      const courseData = takenCoursesData.find(d => d.course_id === courseId);
+      if (!courseData) return;
+      remove(courseData.id);
+
+    } else {
+      setEditing(false);
+      setEditingCourseId(courseId);
+      onOpen();
+    }
+  }
+
+  const findSemesterIdEditing = () => {
+    if (!editingCourseId || !takenCoursesData) return "";
+    const data = takenCoursesData.find(d => d.course_id === editingCourseId);
+    if (!data) return "";
+    return data.semester_id;
+  }
+
+  const semesterIdPlaceholder = "Enter Semester"
+
+  const semesterIdField: TextSelectField = {
+    name: "semester_id",
+    initialValue: findSemesterIdEditing(),
+    label: "Semester",
+    placeholder: semesterIdPlaceholder,
+    validate: (v: string) => (v === "" || v === semesterIdPlaceholder) ? "Please enter semester" : "",
+    isRequired: true,
+
+    possibleValues: semesters ? semesters.map(s => s.id) : [],
+    possibleValuesLabels: semesters ? semesters.map(s => s.name) : []
+  }
+
+  const onEdit = (courseId: string) => {
+    setEditing(true);
+    setEditingCourseId(courseId);
+    onOpen();
+  }
+
+  const onSubmit = (elem: Omit<TakenCourseData, "id">) => {
+    console.log(elem, editing, editingCourseId);
+
+    if (editing) {
+      // Editing
+      if (takenCoursesData && editingCourseId) {
+        const baseData = takenCoursesData.find(d => d.course_id === editingCourseId);
+
+        if (baseData) {
+          update({ id: baseData.id, course_id: elem.course_id, semester_id: elem.semester_id });
+        }
+      }
+    } else {
+      if (!editingCourseId) return;
+      add({ course_id: editingCourseId, semester_id: elem.semester_id })
+    }
+
+    setEditingCourseId(null);
+    onClose();
+  }
 
   return (
-    <Stack spacing={4}>
-      <Heading mb={2}>{plan.name}</Heading>
+    <>
+      <Stack spacing={4}>
+        <Heading mb={2}>{plan.name}</Heading>
 
-      {plan.notes && (
-        <Text>{plan.notes}</Text>
-      )}
+        {plan.notes && (
+          <Text>{plan.notes}</Text>
+        )}
 
-      <Divider/>
+        <Divider/>
 
-      <Stack spacing={6}>
-        <Stack>
-          <HStack>
-            <Text fontWeight="semibold">Programme:</Text>
-            <Text>{programme.name}</Text>
-          </HStack>
-
-          {major && (
+        <Stack spacing={6}>
+          <Stack>
             <HStack>
-              <Text fontWeight="semibold">Major:</Text>
-              <Text>{major.name}</Text>
+              <Text fontWeight="semibold">Programme:</Text>
+              <Text>{programme.name}</Text>
             </HStack>
-          )}
 
-          {minor && (
-            <HStack>
-              <Text fontWeight="semibold">Minor:</Text>
-              <Text>{minor.name}</Text>
-            </HStack>
-          )}
+            {major && (
+              <HStack>
+                <Text fontWeight="semibold">Major:</Text>
+                <Text>{major.name}</Text>
+              </HStack>
+            )}
+
+            {minor && (
+              <HStack>
+                <Text fontWeight="semibold">Minor:</Text>
+                <Text>{minor.name}</Text>
+              </HStack>
+            )}
+          </Stack>
+
+          <Stack>
+            <Heading size="md">Credits per semester</Heading>
+            {semesters && semesters.map(semester => (
+              <HStack key={semester.id}>
+                <Text fontWeight="semibold">{semester.name}:</Text>
+                <Text>{creditsInSemester(semester.id)} credits</Text>
+              </HStack>
+            ))}
+          </Stack>
+
+          <Stack>
+            <Heading size="md">Taken courses</Heading>
+            {takenCourses.length === 0 && <Text color="gray">No courses taken yet.</Text>}
+
+            <Accordion allowMultiple allowToggle>
+              <AccordionItem>
+                <AccordionButton>
+                  <Text>Show taken courses</Text>
+                  <AccordionIcon/>
+                </AccordionButton>
+
+                <AccordionPanel>
+                  <CoursesList
+                    programmeId={programme.id}
+                    takenCoursesData={takenCoursesData ? takenCoursesData : undefined}
+                    coursesIdsToShow={takenCourses.map(c => c.id)}
+                    noBorder
+                    onEdit={onEdit}
+
+                    showMinorId={plan.chosen_minor_id}
+                    showMajorId={plan.chosen_major_id}
+                  />
+                </AccordionPanel>
+              </AccordionItem>
+
+              {takenCoursesData && (
+                <AccordionItem>
+                  <AccordionButton>
+                    <Text>Take courses</Text>
+                    <AccordionIcon/>
+                  </AccordionButton>
+
+                  <AccordionPanel>
+                    <CoursesList
+                      programmeId={programme.id}
+                      takenCoursesData={takenCoursesData}
+                      onCheck={onCheck}
+                      noBorder
+
+                      showMinorId={plan.chosen_minor_id}
+                      showMajorId={plan.chosen_major_id}
+                    />
+                  </AccordionPanel>
+                </AccordionItem>
+              )}
+            </Accordion>
+          </Stack>
         </Stack>
 
-        <Stack>
-          <Heading size="md">Chosen courses</Heading>
-          {chosenCourses.length === 0 && <Text color="gray">No courses taken yet.</Text>}
-
-          <Accordion>
-            <AccordionItem>
-              <AccordionButton>
-                <Text>Show taken courses</Text>
-                <AccordionIcon />
-              </AccordionButton>
-
-              <AccordionPanel>
-                <CoursesList
-                  programmeId={programme.id}
-                  coursesIdsToShow={chosenCourses.map(c => c.id)}
-                  noBorder
-                />
-              </AccordionPanel>
-            </AccordionItem>
-
-            <AccordionItem>
-              <AccordionButton>
-                <Text>Take courses</Text>
-                <AccordionIcon />
-              </AccordionButton>
-
-              <AccordionPanel>
-                <CoursesList
-                  programmeId={programme.id}
-                  chosenCoursesIds={chosenCourses.map(c => c.id)}
-                  onCheck={takeCourse}
-                  noBorder
-                />
-              </AccordionPanel>
-            </AccordionItem>
-          </Accordion>
-        </Stack>
       </Stack>
 
-    </Stack>
+      <DataModal
+        headerTitle={<Text>{editingCourseId ? "Edit " : "Add "}Taken course</Text>}
+        alertTitle={<Text>Taken course</Text>}
+        fields={[semesterIdField]}
+        onSubmit={onSubmit}
+        isOpen={isOpen}
+        onClose={onClose}
+      />
+    </>
+
   )
 }
 

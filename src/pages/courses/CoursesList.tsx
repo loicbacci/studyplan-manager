@@ -7,6 +7,7 @@ import { useCategoriesData } from "../../lib/firestore/categories";
 import { useCourses } from "../../lib/firestore/courses";
 import { useSeasons } from "../../lib/firestore/seasons";
 import CoursesCategoryList from "./CoursesCategoryList";
+import { useProgramme } from "../../lib/firestore/programmes";
 
 export type UpdateCourse = (courseId: string) => (
   school_course_id: string, name: string, link: string, credits: number, season_id: string, category_id: string,
@@ -18,18 +19,29 @@ export type RemoveCourse = (courseId: string) => () => void
 interface CoursesListProps {
   programmeId: string,
   coursesIdsToShow?: string[],  // Used to only show some courses
-  chosenCoursesIds?: string[],   // Used to take/untake courses
+  takenCoursesData?: TakenCourseData[],   // Used to take/untake courses
   onCheck?: (courseId: string, checked: boolean) => void,
-  noBorder?: boolean
+  noBorder?: boolean,
+  onEdit?: (courseId: string) => void,
+  showMinorId?: string,
+  showMajorId?: string
 }
 
 const CoursesList = (props: CoursesListProps) => {
-  const { programmeId, coursesIdsToShow, chosenCoursesIds, onCheck, noBorder } = props;
+  const {
+    programmeId, coursesIdsToShow, takenCoursesData, onCheck, noBorder, onEdit, showMinorId, showMajorId
+  } = props;
   const { isOpen, onToggle, onOpen } = useDisclosure();
 
   const { courses, add, update, remove } = useCourses(programmeId);
   const { categoriesData } = useCategoriesData(programmeId);
   const { seasons } = useSeasons(programmeId);
+  const { programme } = useProgramme(programmeId);
+
+  const takenCourses = (takenCoursesData && courses) ? courses.filter(c => takenCoursesData.some(d => d.course_id === c.id)) : [];
+  // @ts-ignore
+  const takenCredits = takenCourses.map(c => Number.parseInt(c.credits)).reduce((acc, curVal) => acc + curVal, 0);
+
 
   useEffect(() => {
     if (noBorder) {
@@ -77,8 +89,11 @@ const CoursesList = (props: CoursesListProps) => {
             updateCourse={updateCourse}
             removeCourse={removeCourse}
             coursesIdsToShow={coursesIdsToShow}
-            chosenCoursesIds={chosenCoursesIds}
+            takenCoursesData={takenCoursesData}
             onCheck={onCheck}
+            onEdit={onEdit}
+            showMajorId={showMajorId}
+            showMinorId={showMinorId}
           />
         )}
       </Stack>
@@ -89,6 +104,15 @@ const CoursesList = (props: CoursesListProps) => {
     </>
   )
 
+  const bgColor = () => {
+    if (takenCoursesData && programme) {
+      if (takenCredits < programme.min_credits) return "red.200";
+      else return "green.200";
+    } else {
+      return undefined;
+    }
+  }
+
   return (
     <Stack
       borderWidth={noBorder ? undefined : "1px"}
@@ -98,20 +122,22 @@ const CoursesList = (props: CoursesListProps) => {
       px={noBorder ? undefined : { base: 2, lg: 4 }}
       w="100%"
     >
-      {!noBorder && (
-        <HStack justify="space-between">
-          <Heading size="md" mb={{ base: 0, lg: 2 }}>
-            Courses
-          </Heading>
+      <HStack justify="space-between" bgColor={bgColor()}>
+        <Heading size="md" mb={{ base: 0, lg: 2 }}>
+          {(noBorder && programme) ? programme.name : "Courses"}
+        </Heading>
 
+        {(noBorder && programme) ? (
+          <Heading size="md">Taken {takenCredits}/{programme.min_credits} credits</Heading>
+        ) : (
           <IconButton
             variant="ghost"
             aria-label="Open menu"
             icon={isOpen ? <FiChevronUp/> : <FiChevronDown fontSize="1.25rem"/>}
             onClick={onToggle}
           />
-        </HStack>
-      )}
+        )}
+      </HStack>
 
       {isOpen && Body}
     </Stack>

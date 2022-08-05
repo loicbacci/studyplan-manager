@@ -1,9 +1,10 @@
 import React, { useEffect } from "react";
-import { Box, LinkBox, LinkOverlay, Stack, Text, useDisclosure } from "@chakra-ui/react";
+import { Box, HStack, LinkBox, LinkOverlay, Stack, Text, useDisclosure } from "@chakra-ui/react";
 import CoursesSeasonList from "./CoursesSeasonList";
 import { sortByIndex } from "../../lib/utils";
 import { useCategoriesData } from "../../lib/firestore/categories";
 import { RemoveCourse, UpdateCourse } from "./CoursesList";
+import { useCourses } from "../../lib/firestore/courses";
 
 interface CoursesSubCategoryListProps {
   courses: Course[],
@@ -13,12 +14,13 @@ interface CoursesSubCategoryListProps {
   removeCourse: RemoveCourse,
 
   coursesIdsToShow?: string[],  // Used to only show some courses
-  chosenCoursesIds?: string[],   // Used to take/untake courses
-  onCheck?: (courseId: string, checked: boolean) => void
+  takenCoursesData?: TakenCourseData[],   // Used to take/untake courses
+  onCheck?: (courseId: string, checked: boolean) => void,
+  onEdit?: (courseId: string) => void
 }
 
 const CoursesSubCategoryList = (props: CoursesSubCategoryListProps) => {
-  const { programmeId, categoryId, courses, updateCourse, removeCourse, coursesIdsToShow, chosenCoursesIds, onCheck } = props;
+  const { programmeId, categoryId, onEdit, courses, updateCourse, removeCourse, coursesIdsToShow, takenCoursesData, onCheck } = props;
 
   const { categoriesData } = useCategoriesData(programmeId);
 
@@ -61,8 +63,9 @@ const CoursesSubCategoryList = (props: CoursesSubCategoryListProps) => {
           updateCourse={updateCourse}
           removeCourse={removeCourse}
           coursesIdsToShow={coursesIdsToShow}
-          chosenCoursesIds={chosenCoursesIds}
+          takenCoursesData={takenCoursesData}
           onCheck={onCheck}
+          onEdit={onEdit}
         />
       ))}
     </>
@@ -77,22 +80,46 @@ interface SubCategoryEntryProps {
   removeCourse: RemoveCourse,
 
   coursesIdsToShow?: string[],  // Used to only show some courses
-  chosenCoursesIds?: string[],   // Used to take/untake courses
-  onCheck?: (courseId: string, checked: boolean) => void
+  takenCoursesData?: TakenCourseData[],   // Used to take/untake courses
+  onCheck?: (courseId: string, checked: boolean) => void,
+  onEdit?: (courseId: string) => void
 }
 
 const SubCategoryEntry = (props: SubCategoryEntryProps) => {
-  const { subCategory, courses, programmeId, updateCourse, removeCourse, coursesIdsToShow, chosenCoursesIds, onCheck } = props;
+  const { subCategory, courses, onEdit, programmeId, updateCourse, removeCourse, coursesIdsToShow, takenCoursesData, onCheck } = props;
 
   const { isOpen, onToggle, onOpen } = useDisclosure();
 
   useEffect(onOpen, []);
 
+  const takenCourses = (takenCoursesData) ? courses.filter(c => takenCoursesData.some(d => d.course_id === c.id)) : [];
+  // @ts-ignore
+  const takenCredits = takenCourses.map(c => Number.parseInt(c.credits)).reduce((acc, curVal) => acc + curVal, 0);
+
+
+  const bgColor = () => {
+    if (takenCoursesData && subCategory.min_credits) {
+      if (takenCredits < subCategory.min_credits) return "red.200";
+      else return "green.200";
+    } else {
+      return undefined;
+    }
+  }
+
   return (
     <>
-      <Text fontWeight="semibold" onClick={onToggle} _hover={{ cursor: "pointer" }}>
-        {subCategory.name}
-      </Text>
+      <HStack justify="space-between" bgColor={bgColor()}>
+        <Text fontWeight="semibold" onClick={onToggle} _hover={{ cursor: "pointer" }}>
+          {subCategory.name}
+        </Text>
+
+        {((takenCoursesData) && courses) && (
+          <Text fontWeight={bgColor() === undefined ? "semibold" : undefined}>
+            Taken {takenCredits}{subCategory.min_credits && `/${subCategory.min_credits}`} credits
+          </Text>
+        )}
+      </HStack>
+
 
 
       {isOpen && <Box pl={{ base: 0.5, lg: 2 }}>
@@ -108,8 +135,9 @@ const SubCategoryEntry = (props: SubCategoryEntryProps) => {
             updateCourse={updateCourse}
             removeCourse={removeCourse}
             coursesIdsToShow={coursesIdsToShow}
-            chosenCoursesIds={chosenCoursesIds}
+            takenCoursesData={takenCoursesData}
             onCheck={onCheck}
+            onEdit={onEdit}
           />
         </Stack>
       </Box>}

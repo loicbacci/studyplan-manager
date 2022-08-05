@@ -16,7 +16,6 @@ interface Plan extends BaseData {
   programme_id: string
   chosen_major_id: string
   chosen_minor_id: string
-  chosen_courses_ids: string[],
   notes?: string
 }
 
@@ -78,4 +77,9 @@ interface Course extends BaseData {
 
   major_id?: string,
   minor_id?: string
+}
+
+interface TakenCourseData extends BaseData {
+  course_id: string,
+  semester_id: string
 }

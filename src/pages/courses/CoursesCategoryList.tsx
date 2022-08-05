@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Box, Stack, Text, useDisclosure } from "@chakra-ui/react";
+import { Box, HStack, Stack, Text, useDisclosure } from "@chakra-ui/react";
 import CoursesSubCategoryList from "./CoursesSubCategoryList";
 import CoursesSeasonList from "./CoursesSeasonList";
 import { objEqual, sortByIndex } from "../../lib/utils";
@@ -15,19 +15,25 @@ interface CoursesCategoryListProps {
   removeCourse: RemoveCourse,
 
   coursesIdsToShow?: string[],  // Used to only show some courses
-  chosenCoursesIds?: string[],   // Used to take/untake courses
-  onCheck?: (courseId: string, checked: boolean) => void
+  takenCoursesData?: TakenCourseData[],   // Used to take/untake courses
+  onCheck?: (courseId: string, checked: boolean) => void,
+  onEdit?: (courseId: string) => void,
+
+  showMinorId?: string,
+  showMajorId?: string
 }
 
 const CoursesCategoryList = (props: CoursesCategoryListProps) => {
-  const { programmeId, courses, updateCourse, removeCourse, coursesIdsToShow, chosenCoursesIds, onCheck } = props;
+  const { programmeId, showMajorId, showMinorId, onEdit, courses, updateCourse, removeCourse, coursesIdsToShow, takenCoursesData, onCheck } = props;
 
   const { categoriesData } = useCategoriesData(programmeId);
   const categories = categoriesData ? categoriesData.map(cd => cd.category) : [];
 
-  const { majors } = useMajors(programmeId);
-  const { minors } = useMinors(programmeId);
+  const { majors: baseMajors } = useMajors(programmeId);
+  const { minors: baseMinors } = useMinors(programmeId);
 
+  const majors = baseMajors ? baseMajors.filter(m => m.id === showMajorId) : null;
+  const minors = baseMinors ? baseMinors.filter(m => m.id === showMinorId) : null;
 
   const groupByCategory = (cs: Course[]) => {
     const res = [] as [{ category: Category, major?: Major, minor?: Minor }, Course[]][];
@@ -73,8 +79,9 @@ const CoursesCategoryList = (props: CoursesCategoryListProps) => {
             updateCourse={updateCourse}
             removeCourse={removeCourse}
             coursesIdsToShow={coursesIdsToShow}
-            chosenCoursesIds={chosenCoursesIds}
+            takenCoursesData={takenCoursesData}
             onCheck={onCheck}
+            onEdit={onEdit}
           />
         ))}
     </>
@@ -91,18 +98,23 @@ interface CategoryEntryProps {
   removeCourse: RemoveCourse,
 
   coursesIdsToShow?: string[],  // Used to only show some courses
-  chosenCoursesIds?: string[],   // Used to take/untake courses
-  onCheck?: (courseId: string, checked: boolean) => void
+  takenCoursesData?: TakenCourseData[],   // Used to take/untake courses
+  onCheck?: (courseId: string, checked: boolean) => void,
+  onEdit?: (courseId: string) => void
 }
 
 const CategoryEntry = (props: CategoryEntryProps) => {
-  const { category, programmeId, major, minor, courses, updateCourse, removeCourse, coursesIdsToShow, chosenCoursesIds, onCheck } = props;
+  const { category, onEdit, programmeId, major, minor, courses, updateCourse, removeCourse, coursesIdsToShow, takenCoursesData, onCheck } = props;
 
   const { isOpen, onToggle, onOpen } = useDisclosure();
 
   useEffect(onOpen, []);
 
   const { categoriesData } = useCategoriesData(programmeId);
+
+  const takenCourses = (takenCoursesData) ? courses.filter(c => takenCoursesData.some(d => d.course_id === c.id)) : [];
+  // @ts-ignore
+  const takenCredits = takenCourses.map(c => Number.parseInt(c.credits)).reduce((acc, curVal) => acc + curVal, 0);
 
   const getSubCategories = (categoryId: string) => {
     if (!categoriesData) return null;
@@ -115,6 +127,7 @@ const CategoryEntry = (props: CategoryEntryProps) => {
   const subCategories = getSubCategories(category.id);
   const hasSubcategories = subCategories !== null;
 
+
   let title = category.name;
 
   if (major) {
@@ -124,11 +137,28 @@ const CategoryEntry = (props: CategoryEntryProps) => {
     title += ` (${minor.name})`
   }
 
+  const bgColor = () => {
+    if (takenCoursesData && category.min_credits) {
+      if (takenCredits < category.min_credits) return "red.200";
+      else return "green.200";
+    } else {
+      return undefined;
+    }
+  }
+
   return (
     <Stack fontSize={{ base: "15px", lg: "" }}>
-      <Text fontWeight="semibold" onClick={onToggle} _hover={{ cursor: "pointer" }}>
-        {title}
-      </Text>
+      <HStack justify="space-between" bgColor={bgColor()}>
+        <Text fontWeight="semibold" onClick={onToggle} _hover={{ cursor: "pointer" }}>
+          {title}
+        </Text>
+
+        {(takenCoursesData && courses) && (
+          <Text fontWeight={bgColor() === undefined ? "semibold" : undefined}>
+            Taken {takenCredits}{category.min_credits && `/${category.min_credits}`} credits
+          </Text>
+        )}
+      </HStack>
 
       {isOpen && (
         <Box pl={{ base: 0.5, lg: 2 }}>
@@ -142,8 +172,9 @@ const CategoryEntry = (props: CategoryEntryProps) => {
                 updateCourse={updateCourse}
                 removeCourse={removeCourse}
                 coursesIdsToShow={coursesIdsToShow}
-                chosenCoursesIds={chosenCoursesIds}
+                takenCoursesData={takenCoursesData}
                 onCheck={onCheck}
+                onEdit={onEdit}
               />
             ) : (
               // Grouped by season
@@ -153,8 +184,9 @@ const CategoryEntry = (props: CategoryEntryProps) => {
                 updateCourse={updateCourse}
                 removeCourse={removeCourse}
                 coursesIdsToShow={coursesIdsToShow}
-                chosenCoursesIds={chosenCoursesIds}
+                takenCoursesData={takenCoursesData}
                 onCheck={onCheck}
+                onEdit={onEdit}
               />
             )}
           </Stack>

@@ -32,6 +32,7 @@ import { useMinors } from "../../lib/firestore/minors";
 import { useCategoriesData } from "../../lib/firestore/categories";
 import { useSeasons } from "../../lib/firestore/seasons";
 import { sortByIndex } from "../../lib/utils";
+import { useSemesters } from "../../lib/firestore/semesters";
 
 
 interface CoursesListEntryBaseProps {
@@ -47,17 +48,20 @@ interface CoursesListEntryBaseProps {
   ) => void,
   removeCourse?: () => void,
 
-  isChecked?: boolean
-  onCheck?: (checked: boolean) => void
+  isChecked?: boolean,
+  takenSemesterId?: string,
+  onCheck?: (checked: boolean) => void,
+  onEdit?: () => void
 }
 
 const CoursesListEntryBase = (props: CoursesListEntryBaseProps) => {
-  const { programmeId, course, addCourse, updateCourse, removeCourse, isChecked, onCheck } = props;
+  const { programmeId, course, addCourse, updateCourse, removeCourse, isChecked, onCheck, takenSemesterId, onEdit } = props;
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { majors } = useMajors(programmeId);
   const { minors } = useMinors(programmeId);
   const { categoriesData } = useCategoriesData(programmeId);
   const { seasons } = useSeasons(programmeId);
+  const { semesters } = useSemesters(programmeId);
 
   const isDesktop = useBreakpointValue({ base: false, lg: true });
 
@@ -191,12 +195,26 @@ const CoursesListEntryBase = (props: CoursesListEntryBaseProps) => {
               <Stack spacing={0}>
                 <Link href={course.link} isExternal color="blue.500">{course.name}</Link>
                 {!isDesktop && <Text color="gray">{course.credits} credits</Text>}
+                {(!isDesktop && isChecked === true && takenSemesterId && semesters) && (
+                  <Text color="gray">
+                    {semesters.find(s => s.id === takenSemesterId)?.name}
+                  </Text>
+                )}
               </Stack>
 
             </HStack>
           }
-          right={isDesktop && <Text>{course.credits} credits</Text>}
-          onClick={onOpen}
+          right={isDesktop && (
+            <HStack>
+              {(isDesktop && isChecked === true && takenSemesterId && semesters) && (
+                <Text color="gray">
+                  {semesters.find(s => s.id === takenSemesterId)?.name}
+                </Text>
+              )}
+              <Text>{course.credits} credits</Text>
+            </HStack>
+          )}
+          onClick={onEdit ? onEdit : onOpen}
           isChecked={isChecked}
           onCheck={onCheck}
           iconSize="sm"
@@ -446,7 +464,9 @@ interface CoursesListEntryProps {
   removeCourse: () => void,
 
   isChecked?: boolean
-  onCheck?: (checked: boolean) => void
+  onCheck?: (checked: boolean) => void,
+  takenSemesterId?: string,
+  onEdit?: () => void
 }
 
 export const CoursesListEntry = (props: CoursesListEntryProps) => {
