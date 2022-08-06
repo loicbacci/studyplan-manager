@@ -1,7 +1,8 @@
-import { Flex, Container } from "@chakra-ui/react";
+import { Container, Flex } from "@chakra-ui/react";
 import React from "react";
 import Header from "./Header";
-import { useAuth } from "../lib/auth";
+import { useAppSelector } from "../redux/hooks";
+import { selectIsLoggedIn } from "../redux/authSlice";
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -9,7 +10,8 @@ interface LayoutProps {
 
 const Layout = (props: LayoutProps) => {
   const { children } = props;
-  const { isLoggedIn } = useAuth();
+
+  const isLoggedIn = useAppSelector(selectIsLoggedIn);
 
   return (
     <Flex direction="column" mb={16}>

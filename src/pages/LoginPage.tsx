@@ -9,18 +9,15 @@ import {
   Stack,
   useToast
 } from "@chakra-ui/react";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { auth, useAuth } from "../lib/auth";
 import { Field, Form, Formik } from "formik";
 import { toastErrorOptions } from "../lib/chakraUtils";
-import {useDispatch, useSelector} from "react-redux";
-import {logIn, selectStatus} from "../redux/authSlice";
-import {useAppDispatch, useAppSelector} from "../redux/hooks";
+import { logIn, selectAuthStatus } from "../redux/authSlice";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
 
 const LoginPage = () => {
-  const status = useAppSelector(selectStatus);
+  const status = useAppSelector(selectAuthStatus);
   const dispatch = useAppDispatch();
 
   const navigate = useNavigate();
@@ -67,7 +64,7 @@ const LoginPage = () => {
         >
           {(props) => (
             <Form>
-              <Stack spacing={4} >
+              <Stack spacing={4}>
                 <Field name="email" validate={validateEmail}>
                   {({ field, form }: any) => (
                     <FormControl isInvalid={form.errors.email && form.touched.email}>

@@ -1,8 +1,7 @@
-import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {getAuth, signInWithEmailAndPassword, User} from "firebase/auth";
-import {app} from "../lib/app";
-import {RootState, store} from "./store";
-import {useAppDispatch} from "./hooks";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { app } from "../lib/app";
+import { RootState } from "./store";
 
 const auth = getAuth(app);
 
@@ -57,7 +56,7 @@ export const authSlice = createSlice({
   }
 })
 
-export const logIn = createAsyncThunk("auth/logIn", async (data: {email: string, password: string}) => {
+export const logIn = createAsyncThunk("auth/logIn", async (data: { email: string, password: string }) => {
   return signInWithEmailAndPassword(auth, data.email, data.password);
 })
 
@@ -69,7 +68,8 @@ export const { refresh } = authSlice.actions;
 
 //export const selectIsLoggedIn = (state: RootState) => state.auth.isLoggedIn;
 export const selectUserId = (state: RootState) => state.auth.userId;
-export const selectStatus = (state: RootState) => state.auth.status;
+export const selectAuthStatus = (state: RootState) => state.auth.status;
+export const selectIsLoggedIn = (state: RootState) => state.auth.status === "loggedIn";
 //export const selectSignInError = (state: RootState) => state.auth.signInError;
 
 export default authSlice.reducer;

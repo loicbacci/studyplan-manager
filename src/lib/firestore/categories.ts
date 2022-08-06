@@ -1,8 +1,9 @@
 import { useCollection, useFunctions } from "./firestoreUtils";
 import { useEffect, useState } from "react";
-import { collection, onSnapshot, getDocs } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "./firestore";
-import { useAuth } from "../auth";
+import { useAppSelector } from "../../redux/hooks";
+import { selectUserId } from "../../redux/authSlice";
 
 export const useCategories = (programmeId: string) => {
   return {
@@ -14,7 +15,7 @@ export const useCategories = (programmeId: string) => {
 export const useCategoriesData = (programmeId: string) => {
   const [categoriesData, setCategoriesData] = useState(null as CategoryData[] | null);
   const { categories } = useCategories(programmeId);
-  const { userId } = useAuth();
+  const userId = useAppSelector(selectUserId);
 
   useEffect(() => {
     if (!categories || !userId) return;

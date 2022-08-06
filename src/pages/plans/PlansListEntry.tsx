@@ -3,12 +3,14 @@ import {
   Button,
   FormControl,
   FormErrorMessage,
-  FormLabel, HStack,
+  FormLabel,
+  HStack,
   Input,
   Link,
   Modal,
   ModalBody,
-  ModalContent, ModalFooter,
+  ModalContent,
+  ModalFooter,
   ModalHeader,
   ModalOverlay,
   Select,
@@ -19,10 +21,11 @@ import {
 import Entry from "../../components/Entry";
 import { Link as RLink } from "react-router-dom";
 import { Field, Form, Formik } from "formik";
-import { useProgrammes } from "../../lib/firestore/programmes";
 import { useMajors } from "../../lib/firestore/majors";
 import { useMinors } from "../../lib/firestore/minors";
 import DeleteButton from "../../components/DeleteButton";
+import { useAppSelector } from "../../redux/hooks";
+import { selectProgrammes } from "../../redux/programmesSlice";
 
 interface PlansEntryBaseProps {
   plan?: Plan,
@@ -37,7 +40,7 @@ const PlansListEntryBase = (props: PlansEntryBaseProps) => {
   const { plan, addPlan, updatePlan, removePlan } = props;
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const { programmes } = useProgrammes();
+  const programmes = useAppSelector(selectProgrammes);
 
   const isEditing = plan !== undefined && updatePlan !== undefined && removePlan !== undefined;
   const isAdding = addPlan !== undefined;
@@ -141,29 +144,27 @@ const PlansListEntryBase = (props: PlansEntryBaseProps) => {
                       )}
                     </Field>
 
-                    {programmes && (
-                      <Field as="select" name="programme_id" validate={validateProgrammeId}>
-                        {({ field, form }: any) => (
-                          <FormControl
-                            isInvalid={form.errors.programme_id && form.touched.programme_id}
-                            isRequired
-                          >
-                            <FormLabel>Programme</FormLabel>
-                            <Select {...field} placeholder={programmeIdPlaceholder}>
-                              {programmes.map(programme => (
-                                <option value={programme.id}>
-                                  {programme.name}
-                                </option>
-                              ))}
-                            </Select>
-                            <FormErrorMessage>{form.errors.programme_id}</FormErrorMessage>
-                          </FormControl>
-                        )}
-                      </Field>
-                    )}
+                    <Field as="select" name="programme_id" validate={validateProgrammeId}>
+                      {({ field, form }: any) => (
+                        <FormControl
+                          isInvalid={form.errors.programme_id && form.touched.programme_id}
+                          isRequired
+                        >
+                          <FormLabel>Programme</FormLabel>
+                          <Select {...field} placeholder={programmeIdPlaceholder}>
+                            {programmes.map(programme => (
+                              <option value={programme.id}>
+                                {programme.name}
+                              </option>
+                            ))}
+                          </Select>
+                          <FormErrorMessage>{form.errors.programme_id}</FormErrorMessage>
+                        </FormControl>
+                      )}
+                    </Field>
 
                     {validateProgrammeId(props.values.programme_id) === "" && (
-                      <ProgrammeFields programmeId={props.values.programme_id} />
+                      <ProgrammeFields programmeId={props.values.programme_id}/>
                     )}
                   </Stack>
                 </ModalBody>

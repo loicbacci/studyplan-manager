@@ -13,11 +13,11 @@ import {
 import NavLink from "./NavLink";
 import {FiMenu} from "react-icons/fi";
 import {useAppDispatch, useAppSelector} from "../redux/hooks";
-import {selectStatus, signOut} from "../redux/authSlice";
+import {selectAuthStatus, signOut} from "../redux/authSlice";
 
 const Header = () => {
   const dispatch = useAppDispatch();
-  const status = useAppSelector(selectStatus);
+  const status = useAppSelector(selectAuthStatus);
   const isDesktop = useBreakpointValue({ base: false, lg: true });
   const { isOpen, onToggle, onClose } = useDisclosure();
 

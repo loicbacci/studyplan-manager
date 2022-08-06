@@ -1,22 +1,22 @@
 import React from "react";
 import DataModal from "../../components/DataModal";
-import { Box, Button, Link, Stack, Text, useDisclosure } from "@chakra-ui/react";
+import { Button, Link, Stack, Text, useDisclosure } from "@chakra-ui/react";
 import Entry from "../../components/Entry";
 import { Link as RLink } from "react-router-dom";
+import { addProgramme, deleteProgramme, updateProgramme } from "../../redux/programmesSlice";
+import { useAppDispatch } from "../../redux/hooks";
 
 interface ProgrammesEntryBaseProps {
-  programme?: Programme,
-  addProgramme?: (name: string, minCredits: number, notes?: string) => void,
-  updateProgramme?: (name: string, minCredits: number, notes?: string) => void,
-  removeProgramme?: () => void
+  programme?: Programme
 }
 
 const ProgrammesListEntryBase = (props: ProgrammesEntryBaseProps) => {
-  const { programme, addProgramme, updateProgramme, removeProgramme } = props;
+  const { programme } = props;
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const isEditing = programme !== undefined && updateProgramme !== undefined && removeProgramme !== undefined;
-  const isAdding = addProgramme !== undefined;
+  const dispatch = useAppDispatch();
+
+  const editing = programme !== undefined;
 
   const nameField: TextField = {
     name: "name",
@@ -47,21 +47,18 @@ const ProgrammesListEntryBase = (props: ProgrammesEntryBaseProps) => {
   }
 
   const onSubmit = (elem: Omit<Programme, "id">) => {
-    if (isEditing) {
-      // EDIT
-      updateProgramme(elem.name, elem.min_credits, elem.notes);
-
-    } else if (isAdding) {
-      // ADD
-      addProgramme(elem.name, elem.min_credits, elem.notes);
+    if (editing) {
+      dispatch(updateProgramme({ id: programme.id, ...elem }))
+    } else {
+      dispatch(addProgramme(elem));
     }
 
     onClose();
   }
 
   const onDelete = () => {
-    if (isEditing) {
-      removeProgramme();
+    if (editing) {
+      dispatch(deleteProgramme(programme.id));
     }
 
     onClose();
@@ -69,16 +66,15 @@ const ProgrammesListEntryBase = (props: ProgrammesEntryBaseProps) => {
 
   return (
     <>
-      {isEditing ? (
+      {editing ? (
         <Entry
           left={
-          <Stack spacing={0}>
-            <Link as={RLink} to={`/programmes/${programme.id}`}>
-              {programme.name}
-            </Link>
-            {programme.notes && <Text color="gray">{programme.notes}</Text>}
-          </Stack>
-
+            <Stack spacing={0}>
+              <Link as={RLink} to={`/programmes/${programme.id}`}>
+                {programme.name}
+              </Link>
+              {programme.notes && <Text color="gray">{programme.notes}</Text>}
+            </Stack>
           }
           onClick={onOpen}
           border
@@ -91,11 +87,11 @@ const ProgrammesListEntryBase = (props: ProgrammesEntryBaseProps) => {
       )}
 
       <DataModal
-        headerTitle={<Text>{isEditing ? "Edit" : "Add"} Programme</Text>}
+        headerTitle={<Text>{editing ? "Edit" : "Add"} Programme</Text>}
         alertTitle={<Text>Delete Programme</Text>}
         fields={[nameField, minCreditsField, notesField]}
         onSubmit={onSubmit}
-        onDelete={isEditing ? onDelete : undefined}
+        onDelete={editing ? onDelete : undefined}
         isOpen={isOpen}
         onClose={onClose}
       />
@@ -105,31 +101,18 @@ const ProgrammesListEntryBase = (props: ProgrammesEntryBaseProps) => {
 }
 
 interface ProgrammesListEntryProps {
-  programme: Programme,
-  updateProgramme: (name: string, minCredits: number, notes?: string) => void,
-  removeProgramme: () => void,
+  programme: Programme
 }
 
-export const ProgrammesListEntry = (props: ProgrammesListEntryProps) => {
-  const { programme, updateProgramme, removeProgramme } = props;
+export const ProgrammesListEntry = ({ programme }: ProgrammesListEntryProps) => {
   return (
-    <ProgrammesListEntryBase
-      programme={programme}
-      updateProgramme={updateProgramme}
-      removeProgramme={removeProgramme}
-    />
+    <ProgrammesListEntryBase programme={programme} />
   )
 }
 
-interface AddProgrammeButtonProps {
-  addProgramme: (name: string, minCredits: number, notes?: string) => void,
-}
 
-export const AddProgrammeButton = (props: AddProgrammeButtonProps) => {
-  const { addProgramme } = props;
+export const AddProgrammeButton = () => {
   return (
-    <ProgrammesListEntryBase
-      addProgramme={addProgramme}
-    />
+    <ProgrammesListEntryBase />
   )
 }

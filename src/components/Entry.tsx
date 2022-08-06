@@ -31,25 +31,34 @@ interface EntryProps {
 const Entry = (props: EntryProps) => {
   const { left, right, onClick, popoverHeader, popoverBody, border, iconSize, isChecked, onCheck } = props;
 
+  const hasPopover = popoverHeader !== undefined || popoverBody !== undefined;
+
+  const LeftElem = hasPopover ? (
+    <Popover>
+      <PopoverTrigger>
+        <Center ml={border ? 4 : 1}>
+          {left}
+        </Center>
+      </PopoverTrigger>
+     <PopoverContent>
+          <PopoverArrow/>
+          <PopoverCloseButton/>
+          {popoverHeader && <PopoverHeader>{popoverHeader}</PopoverHeader>}
+          {popoverBody && <PopoverBody>{popoverBody}</PopoverBody>}
+        </PopoverContent>
+    </Popover>
+  ) : (
+    <Center ml={border ? 4 : 1}>
+      {left}
+    </Center>
+  );
+
   return (
     <Flex borderWidth={border ? "1px" : ""} borderRadius="md" w="100%">
-      <Popover>
-        <PopoverTrigger>
-          <Center ml={border ? 4 : 1}>
-            {left}
-          </Center>
-        </PopoverTrigger>
-        {(popoverHeader || popoverBody) && (
-          <PopoverContent>
-            <PopoverArrow/>
-            <PopoverCloseButton/>
-            {popoverHeader && <PopoverHeader>{popoverHeader}</PopoverHeader>}
-            {popoverBody && <PopoverBody>{popoverBody}</PopoverBody>}
-          </PopoverContent>
-        )}
-      </Popover>
+      {LeftElem}
 
       <Spacer/>
+
       <HStack spacing={4}>
         {right}
         {(onCheck !== undefined && isChecked !== undefined) ? (

@@ -4,20 +4,21 @@ import {
   collection,
   deleteDoc as deleteDocF,
   doc,
+  DocumentData,
+  DocumentReference,
   onSnapshot,
   Unsubscribe,
-  updateDoc as updateDocF,
-  DocumentReference,
-  DocumentData
+  updateDoc as updateDocF
 } from "firebase/firestore";
-import { useAuth } from "../auth";
 import { db } from "./firestore";
 import { removeUndefined } from "../firebaseUtils";
+import { useAppSelector } from "../../redux/hooks";
+import { selectUserId } from "../../redux/authSlice";
 
 export const useCollection = <T extends BaseData>(collectionName: string): T[] | null => {
   const [elems, setElems] = useState(null as T[] | null);
   const lastUnsubscribe = useRef(null as Unsubscribe | null);
-  const { userId } = useAuth();
+  const userId = useAppSelector(selectUserId);
 
   useEffect(() => {
     if (!userId) return;
@@ -47,7 +48,7 @@ export const useCollection = <T extends BaseData>(collectionName: string): T[] |
 export const useDoc = <T extends BaseData>(docPath: string): T | null => {
   const [elem, setElem] = useState(null as T | null);
   const lastUnsubscribe = useRef(null as Unsubscribe | null);
-  const { userId } = useAuth();
+  const userId = useAppSelector(selectUserId);
 
   useEffect(() => {
     if (!userId) return;
@@ -94,7 +95,7 @@ export const deleteDoc = (userId: string, docPath: string) => {
 
 
 export const useFunctions = <T extends BaseData>(collectionPath: string) => {
-  const { userId } = useAuth();
+  const userId = useAppSelector(selectUserId);
 
   const [update, setUpdate] = useState((() => () => {
   }) as any);

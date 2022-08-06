@@ -1,8 +1,6 @@
-import { useAuth } from "../lib/auth";
 import { Navigate, useLocation } from "react-router-dom";
-import {useSelector} from "react-redux";
-import {authSlice, selectStatus} from "../redux/authSlice";
-import {store} from "../redux/store";
+import { useSelector } from "react-redux";
+import { selectAuthStatus } from "../redux/authSlice";
 
 interface RequireAuthProps {
   children: React.ReactNode
@@ -10,7 +8,7 @@ interface RequireAuthProps {
 
 const RequireAuth = (props: RequireAuthProps) => {
   const { children } = props;
-  const status = useSelector(selectStatus);
+  const status = useSelector(selectAuthStatus);
   const location = useLocation();
 
   if (status !== "loggedIn") {
