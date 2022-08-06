@@ -15,9 +15,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { auth, useAuth } from "../lib/auth";
 import { Field, Form, Formik } from "formik";
 import { toastErrorOptions } from "../lib/chakraUtils";
+import {useDispatch, useSelector} from "react-redux";
+import {logIn, selectStatus} from "../redux/authSlice";
+import {useAppDispatch, useAppSelector} from "../redux/hooks";
 
 const LoginPage = () => {
-  const { isLoggedIn } = useAuth();
+  const status = useAppSelector(selectStatus);
+  const dispatch = useAppDispatch();
 
   const navigate = useNavigate();
   const location = useLocation() as any;
@@ -25,29 +29,25 @@ const LoginPage = () => {
 
   const from = location.state?.from?.pathname || "/";
 
-  const signIn = (email: string, password: string) => {
-    signInWithEmailAndPassword(auth, email, password)
-      .catch(() => toast(toastErrorOptions("Failed to log in")));
-  }
+  useEffect(() => {
+    if (status === "logInError") {
+      toast(toastErrorOptions("Failed to log in"));
+    }
+  }, [status])
+
 
   useEffect(() => {
-    if (isLoggedIn) {
+    if (status === "loggedIn") {
       navigate(from, { replace: true })
     }
-  }, [isLoggedIn, from, navigate]);
+  }, [status]);
 
   const validateEmail = (value: string) => {
-    if (!value) {
-      return "Email is required";
-    }
-    return ""
+    return !value ? "Email is required" : "";
   }
 
   const validatePassword = (value: string) => {
-    if (!value) {
-      return "Password is required";
-    }
-    return ""
+    return !value ? "Password is required" : "";
   }
 
   return (
@@ -60,7 +60,7 @@ const LoginPage = () => {
           initialValues={{ email: "", password: "" }}
           onSubmit={(values, actions) => {
             setTimeout(() => {
-              signIn(values.email, values.password);
+              dispatch(logIn(values));
               actions.setSubmitting(false)
             }, 1000);
           }}

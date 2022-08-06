@@ -4,23 +4,25 @@ import {
   Container,
   Flex,
   Heading,
-  HStack, IconButton,
-  Spacer,
-  Text,
+  HStack,
+  IconButton,
   useBreakpointValue,
-  useColorModeValue, useDisclosure
+  useColorModeValue,
+  useDisclosure
 } from "@chakra-ui/react";
 import NavLink from "./NavLink";
-import { useAuth } from "../lib/auth";
-import { FiMenu } from "react-icons/fi";
+import {FiMenu} from "react-icons/fi";
+import {useAppDispatch, useAppSelector} from "../redux/hooks";
+import {selectStatus, signOut} from "../redux/authSlice";
 
 const Header = () => {
-  const { isLoggedIn, signOut } = useAuth();
+  const dispatch = useAppDispatch();
+  const status = useAppSelector(selectStatus);
   const isDesktop = useBreakpointValue({ base: false, lg: true });
   const { isOpen, onToggle, onClose } = useDisclosure();
 
   const onLogOutClick = () => {
-    signOut();
+    dispatch(signOut());
     onClose();
   };
 
@@ -35,6 +37,8 @@ const Header = () => {
   const LogOutButton = (
     <Button onClick={onLogOutClick}>Log Out</Button>
   )
+
+  const isLoggedIn = status === "loggedIn";
 
   return (
     <Box as="section" pb={{ base: 4, md: 6 }}>

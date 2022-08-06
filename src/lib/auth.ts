@@ -1,8 +1,9 @@
-import { getAuth } from "firebase/auth";
+import { getAuth, setPersistence, indexedDBLocalPersistence } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { app } from "./app";
 
 export const auth = getAuth(app);
+auth.setPersistence(indexedDBLocalPersistence);
 
 export const useAuth = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(auth.currentUser !== null);
