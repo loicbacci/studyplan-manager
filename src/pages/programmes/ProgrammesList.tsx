@@ -12,13 +12,11 @@ import {
   selectProgrammesUpdateStatus
 } from "../../redux/programmesSlice";
 
-const ProgrammesListLayout = ({ children }: { children: React.ReactNode }) => {
+const ProgrammesListLayout = ({ children }: { children?: React.ReactNode }) => {
   return (
     <Stack spacing={4}>
       <Heading mb={2}>Programmes</Heading>
-
       {children}
-
       <AddProgrammeButton/>
     </Stack>
   )
@@ -83,22 +81,24 @@ const ProgrammesList = () => {
     )
   }
 
+  if (programmes.length === 0) {
+    return (
+      <ProgrammesListLayout>
+        <Center>
+          <Text color="gray">No programmes yet</Text>
+        </Center>
+      </ProgrammesListLayout>
+    )
+  }
+
   return (
-    <Stack spacing={4}>
-      <Heading mb={2}>Programmes</Heading>
-
-      {programmes.length === 0 ? (
-        <Text color="gray">No programmes yet</Text>
-      ) : (
-        <Stack>
-          {programmes.map(p => (
-            <ProgrammesListEntry programme={p} key={p.id}/>
-          ))}
-        </Stack>
-      )}
-
-      <AddProgrammeButton/>
-    </Stack>
+    <ProgrammesListLayout>
+      <Stack>
+        {programmes.map(p => (
+          <ProgrammesListEntry programme={p} key={p.id}/>
+        ))}
+      </Stack>
+    </ProgrammesListLayout>
   )
 }
 

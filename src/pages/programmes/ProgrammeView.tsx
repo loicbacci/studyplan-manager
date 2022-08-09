@@ -1,6 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Divider, Grid, Heading, HStack, Stack, Text, useBreakpointValue } from "@chakra-ui/react";
+import {
+  Alert,
+  AlertIcon, AlertTitle,
+  Center,
+  Divider,
+  Grid,
+  Heading,
+  HStack,
+  Spinner,
+  Stack,
+  Text,
+  useBreakpointValue
+} from "@chakra-ui/react";
 import { useProgramme } from "../../lib/firestore/programmes";
 import MajorsList from "../majors/MajorsList";
 import MinorsList from "../minors/MinorsList";
@@ -8,31 +20,46 @@ import CategoriesList from "../categories/CategoriesList";
 import SeasonsList from "../seasons/SeasonsList";
 import SemestersList from "../semesters/SemestersList";
 import CoursesList from "../courses/CoursesList";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import {
+  selectProgramme,
+  selectSelectedProgramme,
+  selectSelectedProgrammesStatus
+} from "../../redux/selectedProgrammeSlice";
 
-const ProgrammeViewLoader = () => {
+const ProgrammeView = () => {
   const { programmeId } = useParams();
 
-  if (!programmeId) {
-    return <div/>
-  }
-
-  return <ProgrammeView programmeId={programmeId}/>
-}
-
-interface ProgrammePageProps {
-  programmeId: string
-}
-
-const ProgrammeView = (props: ProgrammePageProps) => {
-  const { programmeId } = props;
-  const { programme } = useProgramme(programmeId);
+  const dispatch = useAppDispatch();
+  const programme = useAppSelector(selectSelectedProgramme);
+  const status = useAppSelector(selectSelectedProgrammesStatus);
 
   const isDesktop = useBreakpointValue({ base: false, lg: true });
 
-  if (!programme) {
+  useEffect(() => {
+    if (!programmeId) return;
+    dispatch(selectProgramme(programmeId));
+  }, [programmeId])
+
+  if (status === "not selected" || status === "loading") {
     return (
-      <Text>Programme {programmeId} not found.</Text>
+      <Center>
+        <Spinner />
+      </Center>
     )
+  }
+
+  if (status === "error" || !programme) {
+    return (
+      <Alert status="error">
+        <AlertIcon/>
+        <AlertTitle>Failed to load programme.</AlertTitle>
+      </Alert>
+    )
+  }
+
+  if (!programmeId) {
+    return <div/>
   }
 
   return (
@@ -51,7 +78,7 @@ const ProgrammeView = (props: ProgrammePageProps) => {
         {isDesktop ? (
           <Stack>
             <HStack align="start">
-              <MajorsList programmeId={programme.id}/>
+              <MajorsList />
               <MinorsList programmeId={programme.id}/>
             </HStack>
             <HStack align="start">
@@ -61,7 +88,7 @@ const ProgrammeView = (props: ProgrammePageProps) => {
           </Stack>
         ) : (
           <Stack>
-            <MajorsList programmeId={programme.id}/>
+            <MajorsList />
             <MinorsList programmeId={programme.id}/>
             <SeasonsList programmeId={programme.id}/>
             <SemestersList programmeId={programme.id}/>
@@ -74,5 +101,4 @@ const ProgrammeView = (props: ProgrammePageProps) => {
   )
 }
 
-
-export default ProgrammeViewLoader;
+export default ProgrammeView;

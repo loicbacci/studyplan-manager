@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useMajors } from "../../lib/firestore/majors";
 import {
+  Alert,
+  AlertIcon, AlertTitle,
+  Center,
   Heading,
   HStack,
-  IconButton,
+  IconButton, Spinner,
   Stack,
   Text,
   useBreakpointValue,
@@ -13,55 +16,11 @@ import {
 import { toastErrorOptions, toastSuccessOptions } from "../../lib/chakraUtils";
 import { AddMajorButton, MajorsListEntry } from "./MajorsListEntry";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { fetchMajors, selectMajors, selectMajorsStatus } from "../../redux/selectedProgrammeSlice";
 
-interface MajorsListProps {
-  programmeId: string
-}
-
-const MajorsList = (props: MajorsListProps) => {
-  const { programmeId } = props;
-  const isDesktop = useBreakpointValue({ base: false, lg: true });
+const MajorsLayout = ({ children }: { children?: React.ReactNode }) => {
   const { isOpen, onToggle } = useDisclosure();
-
-  const { majors, add, update, remove } = useMajors(programmeId);
-  const toast = useToast();
-
-
-  const addMajor = (name: string) => {
-    add({ name })
-      .then(() => toast(toastSuccessOptions("Successfully added major")))
-      .catch(() => toast(toastErrorOptions("Failed to add major")));
-  }
-
-  const renameMajor = (majorId: string) => (newName: string) => {
-    update({ id: majorId, name: newName })
-      .then(() => toast(toastSuccessOptions("Successfully edited major")))
-      .catch(() => toast(toastErrorOptions("Failed to edit major")));
-  }
-
-  const removeMajor = (majorId: string) => () => {
-    remove(majorId)
-      .then(() => toast(toastSuccessOptions("Successfully removed major")))
-      .catch(() => toast(toastErrorOptions("Failed to remove major")));
-  }
-
-  const Body = (
-    <>
-      {(majors && majors.length === 0) && <Text color="gray">No majors yet</Text>}
-      <Stack>
-        {majors && majors.map(m => (
-          <MajorsListEntry
-            major={m}
-            renameMajor={renameMajor(m.id)}
-            removeMajor={removeMajor(m.id)}
-            key={m.id}
-          />
-        ))}
-      </Stack>
-
-      <AddMajorButton addMajor={addMajor}/>
-    </>
-  )
 
   return (
     <Stack
@@ -85,8 +44,85 @@ const MajorsList = (props: MajorsListProps) => {
         />
       </HStack>
 
-      {isOpen && Body}
+      {isOpen && children}
     </Stack>
+  )
+}
+
+const MajorsList = () => {
+  const dispatch = useAppDispatch();
+  const majors = useAppSelector(selectMajors);
+  const status = useAppSelector(selectMajorsStatus);
+
+  const toast = useToast();
+
+  useEffect(() => {
+    if (status === "not loaded"){
+      dispatch(fetchMajors());
+    }
+  }, [status])
+
+
+  const addMajor = (name: string) => {
+    /*add({ name })
+      .then(() => toast(toastSuccessOptions("Successfully added major")))
+      .catch(() => toast(toastErrorOptions("Failed to add major")));*/
+  }
+
+  const renameMajor = (majorId: string) => (newName: string) => {
+    /*update({ id: majorId, name: newName })
+      .then(() => toast(toastSuccessOptions("Successfully edited major")))
+      .catch(() => toast(toastErrorOptions("Failed to edit major")));*/
+  }
+
+  const removeMajor = (majorId: string) => () => {
+    /*remove(majorId)
+      .then(() => toast(toastSuccessOptions("Successfully removed major")))
+      .catch(() => toast(toastErrorOptions("Failed to remove major")));*/
+  }
+
+  let Body: JSX.Element
+
+  if (status === "loading" || status === "not loaded") {
+    Body = (
+      <Center>
+        <Spinner />
+      </Center>
+    )
+  } else if (status === "error") {
+    Body = (
+      <Alert status="error">
+        <AlertIcon/>
+        <AlertTitle>Failed to load majors.</AlertTitle>
+      </Alert>
+    )
+  } else if (majors.length === 0) {
+    Body = (
+      <Text color="gray">No majors yet</Text>
+    )
+  } else {
+    Body = (
+      <>
+        <Stack>
+          {majors.map(m => (
+            <MajorsListEntry
+              major={m}
+              renameMajor={renameMajor(m.id)}
+              removeMajor={removeMajor(m.id)}
+              key={m.id}
+            />
+          ))}
+        </Stack>
+
+        <AddMajorButton addMajor={addMajor}/>
+      </>
+    )
+  }
+
+  return (
+    <MajorsLayout>
+      {Body}
+    </MajorsLayout>
   )
 }
 

@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, onSnapshot, Unsubscribe, updateDoc } from "firebase/firestore";
 import { RootState } from "./store";
 import { addId, db } from "../lib/firestore/firestore";
 import { removeUndefined } from "../lib/firebaseUtils";
@@ -10,7 +10,7 @@ interface ProgrammesState {
 
   addStatus: "idle" | "pending" | "success" | "error",
   updateStatus: "idle" | "pending" | "success" | "error",
-  deleteStatus: "idle" | "pending" | "success" | "error",
+  deleteStatus: "idle" | "pending" | "success" | "error"
 }
 
 const initialState: ProgrammesState = {
@@ -43,7 +43,7 @@ export const programmesSlice = createSlice({
         state.status = "loading";
       })
       .addCase(fetchProgrammes.rejected, (state) => {
-        state.status = "unloaded";
+        state.status = "error";
       })
 
       .addCase(addProgramme.pending, (state) => {
@@ -81,22 +81,24 @@ export const programmesSlice = createSlice({
 export const fetchProgrammes = createAsyncThunk<void, void, { state: RootState }>(
   "programmes/fetch", async (_, thunkAPI) => {
     const userId = thunkAPI.getState().auth.userId;
-    if (!userId) throw new Error("User not authentificated");
+    if (!userId) return Promise.reject("User not authentificated");
+
+    if (thunkAPI.getState().programmes.status === "loaded") return Promise.resolve();
 
     onSnapshot(
       collection(db, "users", userId, "programmes"),
       (snapshot) => {
-        const ps = addId<Programme>(snapshot);
-        thunkAPI.dispatch(programmesSlice.actions.updateProgrammes(ps));
+        const programmes = addId<Programme>(snapshot);
+        thunkAPI.dispatch(programmesSlice.actions.updateProgrammes(programmes));
       },
-      () => thunkAPI.dispatch(programmesSlice.actions.errorFetching)
+      () => thunkAPI.dispatch(programmesSlice.actions.errorFetching())
     )
 
     return Promise.resolve();
   }
 )
 
-export const addProgramme = createAsyncThunk<unknown, Omit<Programme, "id">, { state: RootState } >(
+export const addProgramme = createAsyncThunk<unknown, Omit<Programme, "id">, { state: RootState }>(
   "programmes/add", (programme, thunkAPI) => {
     const userId = thunkAPI.getState().auth.userId;
     if (!userId) return Promise.reject("User not authentificated");
