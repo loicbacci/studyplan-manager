@@ -2,7 +2,7 @@
   <LayoutHeader />
 
   <div class="container mx-auto pt-4 pb-6 px-2">
-    <slot />
+    <slot @modalOpen="" />
   </div>
 </template>
 
@@ -14,11 +14,19 @@ export default defineComponent({
   components: {
     LayoutHeader,
   },
+
 });
 </script>
 
 <style>
-body {
-  @apply bg-white dark:bg-gray-900 dark:text-white;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  body {
+    @apply bg-white dark:bg-gray-900 dark:text-white;
+  }
 }
+
 </style>

@@ -1,8 +1,8 @@
 <script lang="ts">
 import { auth, isLoggedIn } from "@/firebase/auth";
 import { defineComponent } from "vue";
-import FBButton from "@/components/FBButton.vue";
-import FBIconButton from "@/components/FBIconButton.vue";
+import FBButton from "@/components/FlowBite/FBButton.vue";
+import FBIconButton from "@/components/FlowBite/FBIconButton.vue";
 
 export default defineComponent({
   components: { FBIconButton, FBButton },

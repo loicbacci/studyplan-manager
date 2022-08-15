@@ -1,21 +1,18 @@
 <template>
-  <div>
-    <div v-if="fetchStatus === 'loaded'" class="flex flex-col space-y-2">
-      <div v-for="programme in programmes" :key="programme.id">
-        <ProgrammeEntry :programme="programme" />
-      </div>
+  <div v-if="fetchStatus === 'loaded'" class="flex flex-col space-y-2">
+    <div v-for="programme in programmes" :key="programme.id">
+      <ProgrammeEntry :programme="programme" />
     </div>
-    <div v-else-if="fetchStatus === 'loading'">Loading</div>
   </div>
+  <div v-else-if="fetchStatus === 'loading'">Loading</div>
 </template>
 
 <script lang="ts">
 import type { Programme } from "@/types/data";
 import { defineComponent } from "vue";
-import { collection, onSnapshot } from "firebase/firestore";
-import { db } from "@/firebase/config";
-import { auth } from "@/firebase/auth";
+import { onSnapshot } from "firebase/firestore";
 import ProgrammeEntry from "@/components/programmes/ProgrammeEntry.vue";
+import { collectionRef } from "@/firebase/database";
 
 export default defineComponent({
   components: {
@@ -31,14 +28,8 @@ export default defineComponent({
     this.fetchProgrammes();
   },
   methods: {
-    isLoading() {
-      return this.fetchStatus === "loading";
-    },
-
-    async fetchProgrammes() {
-      if (!auth.currentUser) return;
-
-      const ref = collection(db, "users", auth.currentUser?.uid, "programmes");
+    fetchProgrammes() {
+      const ref = collectionRef("programmes");
 
       onSnapshot(ref, (snapshot) => {
         this.programmes = [];

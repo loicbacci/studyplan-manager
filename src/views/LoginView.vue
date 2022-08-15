@@ -50,7 +50,7 @@
 import { auth, isLoggedIn, logIn } from "@/firebase/auth";
 import type { AuthError } from "firebase/auth";
 import { defineComponent } from "vue";
-import FBCard from "@/components/FBCard.vue";
+import FBCard from "@/components/FlowBite/FBCard.vue";
 
 export default defineComponent({
   components: { FBCard },
